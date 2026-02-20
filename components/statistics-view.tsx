@@ -225,8 +225,8 @@ export function StatisticsView({ currency = "USD", currencySymbol = "$" }: { cur
           </div>
         </div>
 
-        <div className="h-[280px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[280px] w-full" style={{ minWidth: 0 }}>
+          <ResponsiveContainer width="100%" height={280}>
             <BarChart data={dailyTrafficData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }} barGap={4}>
               <CartesianGrid vertical={false} stroke="#1f2937" strokeDasharray="3 3" />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#4b5563", fontSize: 11, fontWeight: 700 }} dy={10} />
@@ -269,8 +269,8 @@ export function StatisticsView({ currency = "USD", currencySymbol = "$" }: { cur
               <span className="text-xs font-black text-emerald-400">+23.1% vs last period</span>
             </div>
           </div>
-          <div className="h-[240px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-[240px] w-full" style={{ minWidth: 0 }}>
+            <ResponsiveContainer width="100%" height={240}>
               <AreaChart data={revenueData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
                 <defs>
                   <linearGradient id="revGradient" x1="0" y1="0" x2="0" y2="1">
@@ -296,8 +296,8 @@ export function StatisticsView({ currency = "USD", currencySymbol = "$" }: { cur
           <h2 className="text-lg font-black text-white tracking-tight mb-2">Device Breakdown</h2>
           <p className="text-xs text-zinc-500 font-semibold mb-6">Where your visitors come from</p>
 
-          <div className="h-[180px] w-full flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-[180px] w-full flex items-center justify-center" style={{ minWidth: 0 }}>
+            <ResponsiveContainer width="100%" height={180}>
               <PieChart>
                 <Pie
                   data={deviceData}
@@ -432,8 +432,8 @@ export function StatisticsView({ currency = "USD", currencySymbol = "$" }: { cur
           <Clock size={18} className="text-zinc-600" />
         </div>
 
-        <div className="h-[200px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[200px] w-full" style={{ minWidth: 0 }}>
+          <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={hourlyData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
               <defs>
                 <linearGradient id="hourGradient" x1="0" y1="0" x2="0" y2="1">

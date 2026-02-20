@@ -132,8 +132,8 @@ export function ReportsView({ currency = "USD", currencySymbol = "$" }: { curren
         <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-2xl p-6">
           <h3 className="text-sm font-black text-white uppercase tracking-wide mb-1">Settlement Overview</h3>
           <p className="text-[11px] text-zinc-600 mb-6">Gross, net, and fees per settlement</p>
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-56" style={{ minWidth: 0 }}>
+            <ResponsiveContainer width="100%" height={224}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#27272a33" />
                 <XAxis dataKey="name" tick={{ fill: "#71717a", fontSize: 10, fontWeight: 700 }} axisLine={false} tickLine={false} />
