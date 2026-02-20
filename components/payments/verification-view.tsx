@@ -575,33 +575,67 @@ export function VerificationView() {
                   <p className="text-[11px] text-zinc-600">Add your bank account to receive payouts. Your information is encrypted and stored securely.</p>
                 </div>
 
-                {/* Existing bank accounts */}
-                {bankAccounts.length > 0 && (
-                  <div className="space-y-3">
-                    <p className={labelClass}>Connected Accounts</p>
-                    {bankAccounts.map((ba) => (
-                      <div key={ba.id} className="flex items-center justify-between bg-zinc-800/30 border border-zinc-700/30 rounded-xl p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="bg-emerald-400/10 p-2.5 rounded-xl">
-                            <Landmark size={16} className="text-emerald-400" />
+                {/* Current Connected Bank Account */}
+                <div className="bg-zinc-800/20 border border-zinc-700/30 rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-black text-white uppercase tracking-wide">Current Bank Account</p>
+                    {bankAccounts.length > 0 && (
+                      <span className="text-[9px] font-bold text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-lg uppercase border border-emerald-400/20">Connected</span>
+                    )}
+                  </div>
+
+                  {bankAccounts.length > 0 ? (
+                    <div className="space-y-2.5">
+                      {bankAccounts.map((ba) => (
+                        <div key={ba.id} className="flex items-center justify-between bg-zinc-900/40 border border-zinc-700/20 rounded-xl p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="bg-emerald-400/10 p-3 rounded-xl">
+                              <Landmark size={18} className="text-emerald-400" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold text-white">{ba.name || "Bank Account"}</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <p className="text-[10px] text-zinc-500">
+                                  {ba.account_type ? ba.account_type.charAt(0) + ba.account_type.slice(1).toLowerCase() : "Account"}
+                                </p>
+                                {ba.masked_account_number && (
+                                  <>
+                                    <span className="text-zinc-700">&#183;</span>
+                                    <p className="text-[10px] text-zinc-400 font-mono">
+                                      {"****"} {ba.masked_account_number}
+                                    </p>
+                                  </>
+                                )}
+                                {ba.bank_code && (
+                                  <>
+                                    <span className="text-zinc-700">&#183;</span>
+                                    <p className="text-[10px] text-zinc-500">Routing: {ba.bank_code}</p>
+                                  </>
+                                )}
+                              </div>
+                              {ba.currency && (
+                                <p className="text-[10px] text-zinc-600 mt-0.5">{ba.currency} {ba.country ? `- ${ba.country}` : ""}</p>
+                              )}
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-xs font-bold text-white">{ba.name || "Bank Account"}</p>
-                            <p className="text-[10px] text-zinc-500 mt-0.5">
-                              {ba.account_type || "Account"} {ba.masked_account_number ? `ending in ${ba.masked_account_number}` : ""}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[9px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-lg uppercase">Active</span>
-                          <button onClick={() => handleRemoveBankAccount(ba.id)} className="p-2 hover:bg-red-500/10 rounded-lg transition-colors group">
-                            <Trash2 size={14} className="text-zinc-600 group-hover:text-red-400" />
+                          <button onClick={() => handleRemoveBankAccount(ba.id)} className="p-2.5 hover:bg-red-500/10 rounded-xl transition-colors group" title="Remove account">
+                            <Trash2 size={14} className="text-zinc-600 group-hover:text-red-400 transition-colors" />
                           </button>
                         </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-4 p-4 bg-zinc-900/30 border border-dashed border-zinc-700/40 rounded-xl">
+                      <div className="bg-zinc-800/60 p-3 rounded-xl">
+                        <Landmark size={18} className="text-zinc-600" />
                       </div>
-                    ))}
-                  </div>
-                )}
+                      <div>
+                        <p className="text-xs font-medium text-zinc-500">No bank account connected</p>
+                        <p className="text-[10px] text-zinc-600 mt-0.5">Add a bank account below to receive payouts.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Add new bank account form */}
                 <div className="bg-zinc-800/20 border border-zinc-700/30 rounded-2xl p-5 space-y-4">
