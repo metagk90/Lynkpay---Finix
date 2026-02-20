@@ -17,7 +17,7 @@ export function ImageSettings({ block, onClose, onUpdate }: Props) {
   const [rounded, setRounded] = useState(false)
 
   return (
-    <SettingsShell title="Edit Image" tabs={["Content"]} onClose={onClose} onSave={() => onUpdate({ ...block, title })}>
+    <SettingsShell title="Edit Image" tabs={["Content"]} onClose={onClose} onSave={() => onUpdate({ ...block, title, url: linkUrl || block.url, description: altText || block.description })}>
       {() => (
         <div className="max-w-xl space-y-6">
           <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800/50 space-y-5">

@@ -9,11 +9,11 @@ interface Props { block: Block; onClose: () => void; onUpdate: (b: Block) => voi
 
 export function TextSettings({ block, onClose, onUpdate }: Props) {
   const [title, setTitle] = useState(block.title)
-  const [content, setContent] = useState("Start typing your text here...")
-  const [headingType, setHeadingType] = useState("Paragraph")
+  const [content, setContent] = useState(block.content || "Start typing your text here...")
+  const [headingType, setHeadingType] = useState(block.headingType || "Paragraph")
 
   return (
-    <SettingsShell title="Edit Text" tabs={["Content"]} onClose={onClose} onSave={() => onUpdate({ ...block, title })}>
+    <SettingsShell title="Edit Text" tabs={["Content"]} onClose={onClose} onSave={() => onUpdate({ ...block, title, content, headingType })}>
       {() => (
         <div className="max-w-xl space-y-6">
           <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800/50 space-y-5">

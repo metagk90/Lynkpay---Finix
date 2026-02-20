@@ -71,17 +71,154 @@ export default function Page() {
       active: true,
       price: "9.99",
       image: "https://images.unsplash.com/photo-1626544827763-d516dce335e2?w=400",
+      description: "Professional VFX presets to make your videos go viral.",
+      layout: "standard",
+    },
+    {
+      id: 2,
+      title: "Follow Me",
+      type: "Social",
+      active: true,
+      socials: [
+        { platform: "Instagram", url: "https://instagram.com" },
+        { platform: "TikTok", url: "https://tiktok.com" },
+        { platform: "YouTube", url: "https://youtube.com" },
+        { platform: "Twitter", url: "https://twitter.com" },
+      ],
+    },
+    {
+      id: 3,
+      title: "My Portfolio",
+      type: "Link",
+      active: true,
+      url: "https://myportfolio.com",
+      description: "Check out my latest work",
+      thumbnailStyle: "none",
+      layout: "standard",
+    },
+    {
+      id: 4,
+      title: "Behind the Scenes",
+      type: "Video",
+      active: true,
+      videoUrl: "https://youtube.com/watch?v=dQw4w9WgXcQ",
+      description: "See how I create my VFX",
+      layout: "standard",
+    },
+    {
+      id: 5,
+      title: "Support My Work",
+      type: "Supports",
+      active: true,
+      description: "If you enjoy my content, buy me a coffee!",
+      price: "5.00",
     },
   ])
 
   const handleAddBlock = (type: string) => {
+    const defaults: Record<string, Partial<Block>> = {
+      Product: {
+        title: "New Digital Product",
+        price: "0.00",
+        image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400",
+        description: "A premium digital product for your audience.",
+        layout: "standard",
+      },
+      Image: {
+        title: "Image Block",
+        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
+        description: "",
+        layout: "standard",
+      },
+      Text: {
+        title: "Text Block",
+        content: "Share your thoughts, updates, or important info with your audience.",
+        headingType: "Paragraph",
+      },
+      Link: {
+        title: "My Website",
+        url: "https://example.com",
+        description: "",
+        image: null,
+        thumbnailStyle: "none",
+        layout: "standard",
+      },
+      Video: {
+        title: "Watch This",
+        videoUrl: "",
+        description: "Check out my latest video!",
+        layout: "standard",
+      },
+      Social: {
+        title: "Follow Me",
+        socials: [
+          { platform: "Instagram", url: "" },
+          { platform: "TikTok", url: "" },
+          { platform: "YouTube", url: "" },
+        ],
+        layout: "standard",
+      },
+      Blog: {
+        title: "New Blog Post",
+        content: "Write your blog post content here...",
+        image: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600",
+        description: "A quick summary of what this post is about.",
+      },
+      Appointment: {
+        title: "Book a Session",
+        price: "0.00",
+        description: "30 min consultation",
+      },
+      Course: {
+        title: "My Course",
+        price: "0.00",
+        image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600",
+        description: "Learn everything you need to know.",
+      },
+      Event: {
+        title: "Upcoming Event",
+        description: "Join me for this live event!",
+        price: "0.00",
+      },
+      Supports: {
+        title: "Support My Work",
+        description: "If you enjoy my content, buy me a coffee!",
+        price: "5.00",
+      },
+      "Contact Form": {
+        title: "Get in Touch",
+        description: "Send me a message or inquiry.",
+      },
+      Affiliate: {
+        title: "Recommended Product",
+        url: "https://example.com/product",
+        image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400",
+        description: "Check out this product I love!",
+      },
+      "Physical Product": {
+        title: "Merch Item",
+        price: "0.00",
+        image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400",
+        description: "Premium physical product, shipped to your door.",
+      },
+    }
+
+    const typeDefaults = defaults[type] || {}
     const newBlock: Block = {
       id: Date.now(),
-      title: type === "Product" ? "New Digital Block" : "New Link",
+      title: typeDefaults.title || "New Block",
       type: type,
       active: true,
-      price: type === "Product" ? "0.00" : null,
-      image: type === "Product" ? "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400" : null,
+      price: typeDefaults.price ?? null,
+      image: typeDefaults.image ?? null,
+      description: typeDefaults.description ?? null,
+      url: typeDefaults.url ?? null,
+      videoUrl: typeDefaults.videoUrl ?? null,
+      content: typeDefaults.content ?? null,
+      headingType: typeDefaults.headingType ?? null,
+      socials: typeDefaults.socials ?? null,
+      thumbnailStyle: typeDefaults.thumbnailStyle ?? null,
+      layout: typeDefaults.layout ?? null,
     }
     setBlocks([newBlock, ...blocks])
   }

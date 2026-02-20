@@ -22,6 +22,14 @@ export interface Block {
   active: boolean
   price?: string | null
   image?: string | null
+  description?: string | null
+  url?: string | null
+  videoUrl?: string | null
+  content?: string | null
+  headingType?: string | null
+  socials?: { platform: string; url: string }[] | null
+  thumbnailStyle?: "square" | "circle" | "none" | null
+  layout?: "standard" | "featured" | "compact" | null
 }
 
 interface BlockItemProps {

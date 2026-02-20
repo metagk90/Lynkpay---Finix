@@ -10,7 +10,7 @@ interface Props { block: Block; onClose: () => void; onUpdate: (b: Block) => voi
 
 export function LinkSettings({ block, onClose, onUpdate }: Props) {
   const [title, setTitle] = useState(block.title)
-  const [url, setUrl] = useState("https://")
+  const [url, setUrl] = useState(block.url || "https://")
   const [showThumbnail, setShowThumbnail] = useState(false)
   const [openNewTab, setOpenNewTab] = useState(true)
   const [lockLink, setLockLink] = useState(false)
@@ -18,7 +18,7 @@ export function LinkSettings({ block, onClose, onUpdate }: Props) {
   const [animation, setAnimation] = useState<"none" | "shake" | "pulse" | "bounce">("none")
 
   return (
-    <SettingsShell title="Edit Link" tabs={["Content"]} onClose={onClose} onSave={() => onUpdate({ ...block, title })}>
+    <SettingsShell title="Edit Link" tabs={["Content"]} onClose={onClose} onSave={() => onUpdate({ ...block, title, url, thumbnailStyle: showThumbnail ? "square" : "none" })}>
       {() => (
         <div className="max-w-xl space-y-6">
           <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800/50 space-y-5">

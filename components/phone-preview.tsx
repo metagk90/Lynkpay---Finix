@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { X, Search, ShoppingCart, User, ArrowRight, ArrowLeft, CreditCard, Lock, Check, Loader2, AlertCircle } from "lucide-react"
+import { X, Search, ShoppingCart, User, ArrowRight, ArrowLeft, CreditCard, Lock, Check, Loader2, AlertCircle, Play, ExternalLink, Heart, Calendar, BookOpen, GraduationCap, Clock, MapPin, Mail, Truck, Tag } from "lucide-react"
 import type { Block } from "./block-item"
 import type { AppearanceConfig } from "@/lib/appearance-types"
 import { DEFAULT_APPEARANCE } from "@/lib/appearance-types"
@@ -39,10 +39,11 @@ function getButtonRadius(shape: AppearanceConfig["buttonShape"]) {
 
 function getSocialIcon(name: string) {
   const icons: Record<string, string> = {
-    Instagram: "IG", Tiktok: "TT", Youtube: "YT", X: "X", Twitch: "TW",
-    Linkedin: "LI", Facebook: "FB", Discord: "DC", Telegram: "TG",
+    Instagram: "IG", Tiktok: "TT", TikTok: "TT", Youtube: "YT", YouTube: "YT",
+    X: "X", "Twitter / X": "X", Twitter: "X", Twitch: "TW",
+    Linkedin: "LI", LinkedIn: "LI", Facebook: "FB", Discord: "DC", Telegram: "TG",
     Website: "WB", Email: "EM", Behance: "BE", Dribbble: "DR",
-    Whatsapp: "WA", Spotify: "SP", Threads: "TH",
+    Whatsapp: "WA", WhatsApp: "WA", Spotify: "SP", Threads: "TH", Pinterest: "PI",
   }
   return icons[name] || name.slice(0, 2).toUpperCase()
 }
@@ -575,35 +576,41 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
               <div className="space-y-3 pb-10">
                 {blocks
                   .filter((b) => b.active)
-                  .map((block) => (
+                  .map((block) => {
+                    const isDark = a.textColor === "#f4f4f5" || a.textColor === "#ffffff"
+                    const cardBg = isDark ? "rgba(24,24,27,0.8)" : "rgba(255,255,255,0.9)"
+                    const subtleBg = isDark ? "rgba(39,39,42,0.6)" : "rgba(243,244,246,0.8)"
+                    const shadow = a.softShadow ? `0 4px 24px ${a.blockColor}15` : "none"
+                    const mutedText = `${a.textColor}88`
+
+                    return (
                     <div key={block.id} className="animate-in fade-in zoom-in duration-300">
-                      {block.type === "Product" || block.type === "Digital Product" || block.type === "Physical Product" ? (
+
+                      {/* ── Product / Digital Product / Physical Product ── */}
+                      {(block.type === "Product" || block.type === "Digital Product") ? (
                         <div
                           className="overflow-hidden transition-shadow"
-                          style={{
-                            borderRadius: btnRadius,
-                            backgroundColor: `${a.textColor === "#f4f4f5" || a.textColor === "#ffffff" ? "rgba(24,24,27,0.8)" : "rgba(255,255,255,0.9)"}`,
-                            boxShadow: a.softShadow ? `0 4px 24px ${a.blockColor}15` : "none",
-                          }}
+                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
                         >
-                          <div className="aspect-[16/9] bg-zinc-800 flex items-center justify-center relative overflow-hidden">
+                          <div className="aspect-[16/9] bg-zinc-800 relative overflow-hidden">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={block.image || "https://images.unsplash.com/photo-1626544827763-d516dce335e2?w=400"}
-                              className="w-full h-full object-cover opacity-80"
+                              className="w-full h-full object-cover"
                               alt={block.title}
                               crossOrigin="anonymous"
                             />
                           </div>
                           <div className="p-3">
-                            <p className="font-black text-[11px] mb-1 uppercase" style={{ color: a.textColor }}>
+                            <p className="font-black text-[11px] mb-0.5 uppercase" style={{ color: a.textColor }}>
                               {block.title}
                             </p>
+                            {block.description && (
+                              <p className="text-[8px] leading-relaxed mb-1.5 line-clamp-2" style={{ color: mutedText }}>{block.description}</p>
+                            )}
                             <span className="text-[10px] font-black" style={{ color: a.blockColor }}>
-                              {"$"}
-                              {block.price || "90,000"}
+                              ${block.price || "0.00"}
                             </span>
-                            {/* CTA Buy Now Button */}
                             <button
                               onClick={() => setCheckoutBlock(block)}
                               className="w-full mt-2 py-1.5 text-[9px] font-black uppercase tracking-wider transition-all active:scale-95"
@@ -618,6 +625,428 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                             </button>
                           </div>
                         </div>
+
+                      /* ── Physical Product ── */
+                      ) : block.type === "Physical Product" ? (
+                        <div
+                          className="overflow-hidden transition-shadow"
+                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                        >
+                          <div className="aspect-[16/9] bg-zinc-800 relative overflow-hidden">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={block.image || "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400"}
+                              className="w-full h-full object-cover"
+                              alt={block.title}
+                              crossOrigin="anonymous"
+                            />
+                            <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[7px] font-black uppercase" style={{ backgroundColor: `${a.blockColor}22`, color: a.blockColor }}>
+                              <Truck size={8} /> Ships
+                            </div>
+                          </div>
+                          <div className="p-3">
+                            <p className="font-black text-[11px] mb-0.5 uppercase" style={{ color: a.textColor }}>{block.title}</p>
+                            {block.description && (
+                              <p className="text-[8px] leading-relaxed mb-1.5 line-clamp-2" style={{ color: mutedText }}>{block.description}</p>
+                            )}
+                            <span className="text-[10px] font-black" style={{ color: a.blockColor }}>${block.price || "0.00"}</span>
+                            <button
+                              onClick={() => setCheckoutBlock(block)}
+                              className="w-full mt-2 py-1.5 text-[9px] font-black uppercase tracking-wider transition-all active:scale-95"
+                              style={{
+                                borderRadius: btnRadius,
+                                backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent",
+                                color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor,
+                                border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : "none",
+                              }}
+                            >
+                              Order Now
+                            </button>
+                          </div>
+                        </div>
+
+                      /* ── Image ── */
+                      ) : block.type === "Image" ? (
+                        <div
+                          className="overflow-hidden transition-shadow"
+                          style={{ borderRadius: btnRadius, boxShadow: shadow }}
+                        >
+                          <div className="aspect-[4/3] bg-zinc-800 relative overflow-hidden" style={{ borderRadius: btnRadius }}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={block.image || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600"}
+                              className="w-full h-full object-cover"
+                              alt={block.title}
+                              crossOrigin="anonymous"
+                            />
+                          </div>
+                          {block.title && block.title !== "Image Block" && (
+                            <p className="text-[9px] text-center mt-1.5 font-bold" style={{ color: mutedText }}>{block.title}</p>
+                          )}
+                        </div>
+
+                      /* ── Text ── */
+                      ) : block.type === "Text" ? (
+                        <div className="px-1 py-1">
+                          {block.headingType === "Heading 1" ? (
+                            <p className="font-black text-[15px] leading-tight" style={{ color: a.textColor }}>{block.content || block.title}</p>
+                          ) : block.headingType === "Heading 2" ? (
+                            <p className="font-black text-[13px] leading-snug" style={{ color: a.textColor }}>{block.content || block.title}</p>
+                          ) : block.headingType === "Heading 3" ? (
+                            <p className="font-bold text-[11px] uppercase tracking-wider" style={{ color: a.textColor }}>{block.content || block.title}</p>
+                          ) : (
+                            <p className="text-[10px] leading-relaxed" style={{ color: mutedText }}>{block.content || block.title}</p>
+                          )}
+                        </div>
+
+                      /* ── Link ── */
+                      ) : block.type === "Link" ? (
+                        <div
+                          className="p-3 flex items-center gap-3 transition-shadow"
+                          style={{
+                            borderRadius: btnRadius,
+                            backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent",
+                            color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor,
+                            border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}33`,
+                            boxShadow: shadow,
+                          }}
+                        >
+                          {block.image && (
+                            <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={block.image} className="w-full h-full object-cover" alt="" crossOrigin="anonymous" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[10px] font-black uppercase tracking-wide block truncate">{block.title}</span>
+                            {block.url && block.url !== "https://example.com" && (
+                              <span className="text-[7px] opacity-60 block truncate">{block.url.replace(/https?:\/\//, "")}</span>
+                            )}
+                          </div>
+                          <ExternalLink size={12} className="flex-shrink-0 opacity-60" />
+                        </div>
+
+                      /* ── Video ── */
+                      ) : block.type === "Video" ? (
+                        <div
+                          className="overflow-hidden transition-shadow"
+                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                        >
+                          <div className="aspect-video bg-zinc-900 relative overflow-hidden flex items-center justify-center">
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                            <div
+                              className="w-10 h-10 rounded-full flex items-center justify-center z-10"
+                              style={{ backgroundColor: `${a.blockColor}dd` }}
+                            >
+                              <Play size={18} fill={a.btnTextColor} style={{ color: a.btnTextColor }} className="ml-0.5" />
+                            </div>
+                            {block.videoUrl && (
+                              <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[7px] font-black uppercase" style={{ backgroundColor: `${a.blockColor}22`, color: a.blockColor }}>
+                                {block.videoUrl.includes("youtube") ? "YouTube" : block.videoUrl.includes("tiktok") ? "TikTok" : "Video"}
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-2.5">
+                            <p className="font-black text-[10px] uppercase" style={{ color: a.textColor }}>{block.title}</p>
+                            {block.description && (
+                              <p className="text-[8px] mt-0.5 line-clamp-1" style={{ color: mutedText }}>{block.description}</p>
+                            )}
+                          </div>
+                        </div>
+
+                      /* ── Social ── */
+                      ) : block.type === "Social" ? (
+                        <div className="py-2">
+                          {block.title && block.title !== "Follow Me" && (
+                            <p className="text-[9px] font-bold text-center mb-2.5 uppercase tracking-wider" style={{ color: mutedText }}>{block.title}</p>
+                          )}
+                          <div className="flex flex-wrap justify-center gap-2.5">
+                            {(block.socials || []).map((s, i) => (
+                              <div
+                                key={i}
+                                className="w-9 h-9 rounded-full flex items-center justify-center text-[8px] font-black transition-transform hover:scale-110"
+                                style={{
+                                  backgroundColor: `${a.blockColor}18`,
+                                  color: a.blockColor,
+                                  border: `1.5px solid ${a.blockColor}40`,
+                                }}
+                              >
+                                {getSocialIcon(s.platform)}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                      /* ── Blog ── */
+                      ) : block.type === "Blog" ? (
+                        <div
+                          className="overflow-hidden transition-shadow"
+                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                        >
+                          {block.image && (
+                            <div className="aspect-[2/1] bg-zinc-800 relative overflow-hidden">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={block.image} className="w-full h-full object-cover" alt={block.title} crossOrigin="anonymous" />
+                              {block.price && (
+                                <div className="absolute top-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[7px] font-black" style={{ backgroundColor: `${a.blockColor}22`, color: a.blockColor }}>
+                                  <Lock size={7} /> ${block.price}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          <div className="p-3">
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <BookOpen size={10} style={{ color: a.blockColor }} />
+                              <span className="text-[7px] font-bold uppercase tracking-wider" style={{ color: a.blockColor }}>Blog Post</span>
+                            </div>
+                            <p className="font-black text-[11px] mb-1" style={{ color: a.textColor }}>{block.title}</p>
+                            {block.description && (
+                              <p className="text-[8px] leading-relaxed line-clamp-2 mb-2" style={{ color: mutedText }}>{block.description}</p>
+                            )}
+                            <button
+                              className="w-full py-1.5 text-[9px] font-black uppercase tracking-wider transition-all"
+                              style={{
+                                borderRadius: btnRadius,
+                                backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent",
+                                color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor,
+                                border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}33`,
+                              }}
+                            >
+                              Read Article
+                            </button>
+                          </div>
+                        </div>
+
+                      /* ── Appointment ── */
+                      ) : block.type === "Appointment" ? (
+                        <div
+                          className="overflow-hidden transition-shadow"
+                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                        >
+                          <div className="p-3">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${a.blockColor}18` }}>
+                                <Calendar size={14} style={{ color: a.blockColor }} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-black text-[11px] uppercase truncate" style={{ color: a.textColor }}>{block.title}</p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="flex items-center gap-0.5 text-[8px] font-bold" style={{ color: mutedText }}>
+                                    <Clock size={7} /> 30 min
+                                  </span>
+                                  {block.price && block.price !== "0.00" && (
+                                    <span className="text-[8px] font-black" style={{ color: a.blockColor }}>${block.price}</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            {block.description && (
+                              <p className="text-[8px] leading-relaxed mb-2 line-clamp-2" style={{ color: mutedText }}>{block.description}</p>
+                            )}
+                            <button
+                              className="w-full py-1.5 text-[9px] font-black uppercase tracking-wider transition-all active:scale-95"
+                              style={{
+                                borderRadius: btnRadius,
+                                backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent",
+                                color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor,
+                                border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}33`,
+                              }}
+                            >
+                              Book Now
+                            </button>
+                          </div>
+                        </div>
+
+                      /* ── Course ── */
+                      ) : block.type === "Course" ? (
+                        <div
+                          className="overflow-hidden transition-shadow"
+                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                        >
+                          {block.image && (
+                            <div className="aspect-[16/9] bg-zinc-800 relative overflow-hidden">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={block.image} className="w-full h-full object-cover" alt={block.title} crossOrigin="anonymous" />
+                              <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[7px] font-black uppercase" style={{ backgroundColor: `${a.blockColor}22`, color: a.blockColor }}>
+                                <GraduationCap size={8} /> Course
+                              </div>
+                            </div>
+                          )}
+                          <div className="p-3">
+                            <p className="font-black text-[11px] mb-0.5 uppercase" style={{ color: a.textColor }}>{block.title}</p>
+                            {block.description && (
+                              <p className="text-[8px] leading-relaxed mb-1.5 line-clamp-2" style={{ color: mutedText }}>{block.description}</p>
+                            )}
+                            {block.price && block.price !== "0.00" && (
+                              <span className="text-[10px] font-black" style={{ color: a.blockColor }}>${block.price}</span>
+                            )}
+                            <button
+                              onClick={() => setCheckoutBlock(block)}
+                              className="w-full mt-2 py-1.5 text-[9px] font-black uppercase tracking-wider transition-all active:scale-95"
+                              style={{
+                                borderRadius: btnRadius,
+                                backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent",
+                                color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor,
+                                border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : "none",
+                              }}
+                            >
+                              Enroll Now
+                            </button>
+                          </div>
+                        </div>
+
+                      /* ── Event ── */
+                      ) : block.type === "Event" ? (
+                        <div
+                          className="overflow-hidden transition-shadow"
+                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                        >
+                          <div className="p-3">
+                            <div className="flex gap-3">
+                              <div className="w-12 flex-shrink-0 flex flex-col items-center justify-center rounded-lg py-1.5" style={{ backgroundColor: `${a.blockColor}15` }}>
+                                <span className="text-[8px] font-black uppercase" style={{ color: a.blockColor }}>TBD</span>
+                                <span className="text-[14px] font-black leading-none mt-0.5" style={{ color: a.blockColor }}>--</span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-black text-[11px] uppercase truncate" style={{ color: a.textColor }}>{block.title}</p>
+                                {block.description && (
+                                  <p className="text-[8px] leading-relaxed mt-0.5 line-clamp-2" style={{ color: mutedText }}>{block.description}</p>
+                                )}
+                                <div className="flex items-center gap-2 mt-1.5">
+                                  <span className="flex items-center gap-0.5 text-[7px] font-bold" style={{ color: mutedText }}>
+                                    <MapPin size={7} /> Online
+                                  </span>
+                                  {block.price && block.price !== "0.00" && (
+                                    <span className="text-[8px] font-black" style={{ color: a.blockColor }}>${block.price}</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              className="w-full mt-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider transition-all active:scale-95"
+                              style={{
+                                borderRadius: btnRadius,
+                                backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent",
+                                color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor,
+                                border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}33`,
+                              }}
+                            >
+                              RSVP
+                            </button>
+                          </div>
+                        </div>
+
+                      /* ── Supports (Tip Jar) ── */
+                      ) : block.type === "Supports" ? (
+                        <div
+                          className="overflow-hidden transition-shadow"
+                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                        >
+                          <div className="p-3 text-center">
+                            <div className="w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center" style={{ backgroundColor: `${a.blockColor}15` }}>
+                              <Heart size={18} style={{ color: a.blockColor }} />
+                            </div>
+                            <p className="font-black text-[11px] uppercase" style={{ color: a.textColor }}>{block.title}</p>
+                            {block.description && (
+                              <p className="text-[8px] leading-relaxed mt-1 px-2 line-clamp-2" style={{ color: mutedText }}>{block.description}</p>
+                            )}
+                            <div className="flex items-center justify-center gap-1.5 mt-3 mb-2.5">
+                              {["3", "5", "10"].map((amt) => (
+                                <div
+                                  key={amt}
+                                  className="px-3 py-1.5 rounded-full text-[9px] font-black transition-all cursor-pointer"
+                                  style={{
+                                    backgroundColor: amt === (block.price || "5") ? a.blockColor : `${a.blockColor}12`,
+                                    color: amt === (block.price || "5") ? a.btnTextColor : a.blockColor,
+                                    border: `1.5px solid ${amt === (block.price || "5") ? a.blockColor : `${a.blockColor}30`}`,
+                                  }}
+                                >
+                                  ${amt}
+                                </div>
+                              ))}
+                            </div>
+                            <button
+                              className="w-full py-1.5 text-[9px] font-black uppercase tracking-wider transition-all active:scale-95"
+                              style={{
+                                borderRadius: btnRadius,
+                                backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent",
+                                color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor,
+                                border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}33`,
+                              }}
+                            >
+                              Support
+                            </button>
+                          </div>
+                        </div>
+
+                      /* ── Contact Form ── */
+                      ) : block.type === "Contact Form" || block.type === "Contact" ? (
+                        <div
+                          className="overflow-hidden transition-shadow"
+                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                        >
+                          <div className="p-3">
+                            <div className="flex items-center gap-2 mb-2.5">
+                              <Mail size={12} style={{ color: a.blockColor }} />
+                              <p className="font-black text-[11px] uppercase" style={{ color: a.textColor }}>{block.title}</p>
+                            </div>
+                            {block.description && (
+                              <p className="text-[8px] leading-relaxed mb-2 line-clamp-2" style={{ color: mutedText }}>{block.description}</p>
+                            )}
+                            <div className="space-y-1.5 mb-2.5">
+                              <div className="h-6 rounded-md" style={{ backgroundColor: subtleBg }} />
+                              <div className="h-6 rounded-md" style={{ backgroundColor: subtleBg }} />
+                              <div className="h-10 rounded-md" style={{ backgroundColor: subtleBg }} />
+                            </div>
+                            <button
+                              className="w-full py-1.5 text-[9px] font-black uppercase tracking-wider transition-all"
+                              style={{
+                                borderRadius: btnRadius,
+                                backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent",
+                                color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor,
+                                border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}33`,
+                              }}
+                            >
+                              Send Message
+                            </button>
+                          </div>
+                        </div>
+
+                      /* ── Affiliate ── */
+                      ) : block.type === "Affiliate" ? (
+                        <div
+                          className="overflow-hidden transition-shadow"
+                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                        >
+                          {block.image && (
+                            <div className="aspect-[16/9] bg-zinc-800 relative overflow-hidden">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={block.image} className="w-full h-full object-cover" alt={block.title} crossOrigin="anonymous" />
+                              <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[7px] font-black uppercase" style={{ backgroundColor: `${a.blockColor}22`, color: a.blockColor }}>
+                                <Tag size={8} /> Affiliate
+                              </div>
+                            </div>
+                          )}
+                          <div className="p-3">
+                            <p className="font-black text-[11px] mb-0.5 uppercase" style={{ color: a.textColor }}>{block.title}</p>
+                            {block.description && (
+                              <p className="text-[8px] leading-relaxed mb-1.5 line-clamp-2" style={{ color: mutedText }}>{block.description}</p>
+                            )}
+                            <button
+                              className="w-full mt-1 py-1.5 text-[9px] font-black uppercase tracking-wider transition-all active:scale-95 flex items-center justify-center gap-1"
+                              style={{
+                                borderRadius: btnRadius,
+                                backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent",
+                                color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor,
+                                border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}33`,
+                              }}
+                            >
+                              Shop Now <ExternalLink size={9} />
+                            </button>
+                          </div>
+                        </div>
+
+                      /* ── Default / Fallback ── */
                       ) : (
                         <div
                           className="p-3 flex items-center justify-between transition-shadow"
@@ -625,8 +1054,8 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                             borderRadius: btnRadius,
                             backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent",
                             color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor,
-                            border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : "none",
-                            boxShadow: a.softShadow ? `0 4px 24px ${a.blockColor}15` : "none",
+                            border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}33`,
+                            boxShadow: shadow,
                           }}
                         >
                           <span className="text-xs font-black uppercase tracking-wide">{block.title}</span>
@@ -634,7 +1063,8 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                         </div>
                       )}
                     </div>
-                  ))}
+                    )
+                  })}
               </div>
             </div>
           )}

@@ -14,11 +14,13 @@ export function SocialSettings({ block, onClose, onUpdate }: Props) {
   const [title, setTitle] = useState(block.title)
   const [showLabels, setShowLabels] = useState(false)
   const [iconStyle, setIconStyle] = useState<"filled" | "outlined" | "rounded">("filled")
-  const [links, setLinks] = useState<SocialLink[]>([
-    { id: 1, platform: "Instagram", url: "https://instagram.com/" },
-    { id: 2, platform: "TikTok", url: "https://tiktok.com/@" },
-    { id: 3, platform: "YouTube", url: "https://youtube.com/@" },
-  ])
+  const [links, setLinks] = useState<SocialLink[]>(
+    block.socials?.map((s, i) => ({ id: i + 1, platform: s.platform, url: s.url })) || [
+      { id: 1, platform: "Instagram", url: "https://instagram.com/" },
+      { id: 2, platform: "TikTok", url: "https://tiktok.com/@" },
+      { id: 3, platform: "YouTube", url: "https://youtube.com/@" },
+    ]
+  )
 
   const platforms = ["Instagram", "TikTok", "YouTube", "Twitter / X", "Facebook", "LinkedIn", "Telegram", "WhatsApp", "Spotify", "Discord", "Threads", "Pinterest"]
 
@@ -35,7 +37,7 @@ export function SocialSettings({ block, onClose, onUpdate }: Props) {
   }
 
   return (
-    <SettingsShell title="Edit Social Connect" tabs={["Content"]} onClose={onClose} onSave={() => onUpdate({ ...block, title })}>
+    <SettingsShell title="Edit Social Connect" tabs={["Content"]} onClose={onClose} onSave={() => onUpdate({ ...block, title, socials: links.map((l) => ({ platform: l.platform, url: l.url })) })}>
       {() => (
         <div className="max-w-xl space-y-6">
           {/* Style */}

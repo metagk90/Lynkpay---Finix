@@ -22,8 +22,8 @@ export function GenericMonetizationSettings({ block, onClose, onUpdate }: Props)
   const config = typeConfig[block.type] || { title: `Edit ${block.type}`, fields: [], hasPrice: true }
 
   const [title, setTitle] = useState(block.title)
-  const [description, setDescription] = useState("")
-  const [price, setPrice] = useState("0")
+  const [description, setDescription] = useState(block.description || "")
+  const [price, setPrice] = useState(block.price || "0")
   const [currency, setCurrency] = useState("USD")
   const [enableNotification, setEnableNotification] = useState(false)
   const [isActive, setIsActive] = useState(true)
@@ -40,7 +40,7 @@ export function GenericMonetizationSettings({ block, onClose, onUpdate }: Props)
   const [shippingNote, setShippingNote] = useState("")
 
   return (
-    <SettingsShell title={config.title} onClose={onClose} onSave={() => onUpdate({ ...block, title })}>
+    <SettingsShell title={config.title} onClose={onClose} onSave={() => onUpdate({ ...block, title, description, price: config.hasPrice ? price : block.price, url: affiliateUrl || block.url })}>
       {(activeTab) =>
         activeTab === "Content" ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

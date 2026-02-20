@@ -10,14 +10,14 @@ interface Props { block: Block; onClose: () => void; onUpdate: (b: Block) => voi
 
 export function VideoSettings({ block, onClose, onUpdate }: Props) {
   const [title, setTitle] = useState(block.title)
-  const [videoUrl, setVideoUrl] = useState("")
+  const [videoUrl, setVideoUrl] = useState(block.videoUrl || "")
   const [platform, setPlatform] = useState<"youtube" | "tiktok" | "instagram" | "other">("youtube")
   const [autoplay, setAutoplay] = useState(false)
   const [loop, setLoop] = useState(false)
   const [showTitle, setShowTitle] = useState(true)
 
   return (
-    <SettingsShell title="Edit Video" tabs={["Content"]} onClose={onClose} onSave={() => onUpdate({ ...block, title })}>
+    <SettingsShell title="Edit Video" tabs={["Content"]} onClose={onClose} onSave={() => onUpdate({ ...block, title, videoUrl, description: block.description })}>
       {() => (
         <div className="max-w-xl space-y-6">
           <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800/50 space-y-5">

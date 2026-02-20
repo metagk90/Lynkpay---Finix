@@ -42,7 +42,7 @@ type BlockLayout = "Default" | "Grid" | "Large Image" | "Compact"
 export function ProductSettings({ block, onClose, onUpdate }: ProductSettingsProps) {
   const [title, setTitle] = useState(block.title)
   const [description, setDescription] = useState(
-    "Learn to become a professional VFX artist and make your tiktok videos go viral!"
+    block.description || "Learn to become a professional VFX artist and make your tiktok videos go viral!"
   )
   const [platformTab, setPlatformTab] = useState<PlatformTab>("Other")
   const [platformUrl, setPlatformUrl] = useState("https://www.affribute.com/thank-you")
@@ -72,7 +72,7 @@ export function ProductSettings({ block, onClose, onUpdate }: ProductSettingsPro
     <SettingsShell
       title="Edit Digital Product"
       onClose={onClose}
-      onSave={() => onUpdate({ ...block, title })}
+      onSave={() => onUpdate({ ...block, title, description, price })}
     >
       {(activeTab) =>
         activeTab === "Content" ? (

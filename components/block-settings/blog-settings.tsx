@@ -10,15 +10,15 @@ interface Props { block: Block; onClose: () => void; onUpdate: (b: Block) => voi
 
 export function BlogSettings({ block, onClose, onUpdate }: Props) {
   const [title, setTitle] = useState(block.title)
-  const [content, setContent] = useState("")
+  const [content, setContent] = useState(block.content || "")
   const [accessType, setAccessType] = useState<"free" | "paid" | "paywall">("free")
-  const [price, setPrice] = useState("0")
+  const [price, setPrice] = useState(block.price || "0")
   const [currency, setCurrency] = useState("USD")
   const [enableComments, setEnableComments] = useState(true)
   const [showDate, setShowDate] = useState(true)
 
   return (
-    <SettingsShell title="Edit Blog" onClose={onClose} onSave={() => onUpdate({ ...block, title })}>
+    <SettingsShell title="Edit Blog" onClose={onClose} onSave={() => onUpdate({ ...block, title, content, price: accessType !== "free" ? price : null, description: block.description })}>
       {(activeTab) =>
         activeTab === "Content" ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
