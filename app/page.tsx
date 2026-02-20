@@ -156,6 +156,15 @@ export default function Page() {
         description: "Check out my latest video!",
         layout: "standard",
       },
+      Social: {
+        title: "Follow Me",
+        socials: [
+          { platform: "Instagram", url: "" },
+          { platform: "TikTok", url: "" },
+          { platform: "YouTube", url: "" },
+        ],
+        layout: "standard",
+      },
       "Social Connect": {
         title: "Follow Me",
         socials: [
@@ -176,6 +185,12 @@ export default function Page() {
         price: "0.00",
         description: "30 min consultation",
       },
+      Course: {
+        title: "My Course",
+        price: "0.00",
+        image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600",
+        description: "Learn everything you need to know.",
+      },
       "Course Video": {
         title: "My Course",
         price: "0.00",
@@ -192,15 +207,31 @@ export default function Page() {
         description: "If you enjoy my content, buy me a coffee!",
         price: "5.00",
       },
+      Contact: {
+        title: "Get in Touch",
+        description: "Send me a message or inquiry.",
+      },
       "Email & Phone Number": {
         title: "Get in Touch",
         description: "Send me a message or inquiry.",
+      },
+      Affiliate: {
+        title: "Recommended Product",
+        url: "https://example.com/product",
+        image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400",
+        description: "Check out this product I love!",
       },
       "Affiliate Products": {
         title: "Recommended Product",
         url: "https://example.com/product",
         image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400",
         description: "Check out this product I love!",
+      },
+      Physical: {
+        title: "Merch Item",
+        price: "0.00",
+        image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400",
+        description: "Premium physical product, shipped to your door.",
       },
       "Physical Product": {
         title: "Merch Item",
