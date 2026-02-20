@@ -1,12 +1,27 @@
 "use client"
 
-import { useState } from "react"
-import { Share2, ExternalLink, Smartphone, ChevronRight, Plus, Settings } from "lucide-react"
+import { useState, useMemo } from "react"
+import { Share2, ExternalLink, Smartphone, ChevronRight, Plus, Settings, Layers, Search } from "lucide-react"
 import { BlockItem, type Block } from "./block-item"
 import { PhonePreview } from "./phone-preview"
 import { AddBlockModal } from "./add-block-modal"
 import { BlockSettingsView } from "./block-settings-view"
 import type { AppearanceConfig } from "@/lib/appearance-types"
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable"
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 
 interface MyLynkViewProps {
   onShowPreview: () => void
@@ -15,13 +30,67 @@ interface MyLynkViewProps {
   onToggleBlock: (id: number) => void
   onDeleteBlock: (id: number) => void
   onUpdateBlock?: (block: Block) => void
+  onReorderBlocks?: (blocks: Block[]) => void
+  onDuplicateBlock?: (id: number) => void
   appearance?: AppearanceConfig
   currency?: string
 }
 
-export function MyLynkView({ onShowPreview, blocks, onAddBlock, onToggleBlock, onDeleteBlock, onUpdateBlock, appearance, currency = "USD" }: MyLynkViewProps) {
+export function MyLynkView({ onShowPreview, blocks, onAddBlock, onToggleBlock, onDeleteBlock, onUpdateBlock, onReorderBlocks, onDuplicateBlock, appearance, currency = "USD" }: MyLynkViewProps) {
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingBlockId, setEditingBlockId] = useState<number | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [filterType, setFilterType] = useState<string>("All")
+
+  const blockTypes = useMemo(() => {
+    const types = new Set(blocks.map((b) => b.type))
+    return ["All", ...Array.from(types)]
+  }, [blocks])
+
+  const filteredBlocks = useMemo(() => {
+    return blocks.filter((block) => {
+      const matchesSearch = searchQuery === "" || block.title.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesType = filterType === "All" || block.type === filterType
+      return matchesSearch && matchesType
+    })
+  }, [blocks, searchQuery, filterType])
+
+  const isFiltering = searchQuery !== "" || filterType !== "All"
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (over && active.id !== over.id) {
+      const oldIndex = blocks.findIndex((b) => b.id === active.id)
+      const newIndex = blocks.findIndex((b) => b.id === over.id)
+      const reordered = [...blocks]
+      const [moved] = reordered.splice(oldIndex, 1)
+      reordered.splice(newIndex, 0, moved)
+      onReorderBlocks?.(reordered)
+    }
+  }
+
+  function handleMoveUp(id: number) {
+    const idx = blocks.findIndex((b) => b.id === id)
+    if (idx <= 0) return
+    const reordered = [...blocks]
+    const [moved] = reordered.splice(idx, 1)
+    reordered.splice(idx - 1, 0, moved)
+    onReorderBlocks?.(reordered)
+  }
+
+  function handleMoveDown(id: number) {
+    const idx = blocks.findIndex((b) => b.id === id)
+    if (idx < 0 || idx >= blocks.length - 1) return
+    const reordered = [...blocks]
+    const [moved] = reordered.splice(idx, 1)
+    reordered.splice(idx + 1, 0, moved)
+    onReorderBlocks?.(reordered)
+  }
 
   const editingBlock = editingBlockId !== null ? blocks.find((b) => b.id === editingBlockId) : null
 
@@ -102,11 +171,128 @@ export function MyLynkView({ onShowPreview, blocks, onAddBlock, onToggleBlock, o
 
         <div className="space-y-3">
           <div className="flex justify-between items-center mb-2">
-            <h3 className="font-black text-zinc-500 uppercase tracking-widest text-[10px]">Block List</h3>
+            <div className="flex items-center gap-3">
+              <h3 className="font-black text-zinc-500 uppercase tracking-widest text-[10px]">Block List</h3>
+              {blocks.length > 0 && (
+                <span className="text-[10px] text-zinc-600 font-medium">
+                  {blocks.length} {blocks.length === 1 ? "block" : "blocks"}
+                  <span className="text-zinc-700 mx-1">/</span>
+                  <span className="text-emerald-500/60">{blocks.filter((b) => b.active).length} active</span>
+                  {blocks.some((b) => !b.active) && (
+                    <>
+                      <span className="text-zinc-700 mx-1">/</span>
+                      <span className="text-red-500/50">{blocks.filter((b) => !b.active).length} hidden</span>
+                    </>
+                  )}
+                </span>
+              )}
+            </div>
           </div>
-          {blocks.map((block) => (
-            <BlockItem key={block.id} block={block} onToggle={onToggleBlock} onDelete={onDeleteBlock} onEdit={setEditingBlockId} />
-          ))}
+
+          {blocks.length > 0 && (
+            <div className="space-y-3">
+              <div className="relative">
+                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" />
+                <input
+                  type="text"
+                  placeholder="Search blocks..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-zinc-900/60 border border-zinc-800 rounded-2xl pl-11 pr-4 py-3 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-colors"
+                />
+              </div>
+              {blockTypes.length > 2 && (
+                <div className="flex gap-2 flex-wrap">
+                  {blockTypes.map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setFilterType(type)}
+                      className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border transition-all ${
+                        filterType === type
+                          ? "bg-emerald-500 text-black border-emerald-500"
+                          : "bg-zinc-900/60 text-zinc-500 border-zinc-800 hover:border-zinc-700 hover:text-zinc-300"
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {blocks.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 px-6">
+              <div className="w-20 h-20 rounded-3xl bg-zinc-800/60 border border-zinc-700/50 flex items-center justify-center mb-6">
+                <Layers size={36} className="text-zinc-600" />
+              </div>
+              <h4 className="text-zinc-300 font-bold text-lg mb-2">No blocks yet</h4>
+              <p className="text-zinc-600 text-sm text-center max-w-xs mb-6 leading-relaxed">
+                Add your first block to start building your page. Products, links, blogs and more.
+              </p>
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="px-6 py-3 bg-emerald-500 text-black rounded-2xl font-black text-xs uppercase shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2"
+              >
+                <Plus size={16} strokeWidth={3} />
+                Add your first block
+              </button>
+            </div>
+          ) : filteredBlocks.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 px-6">
+              <Search size={32} className="text-zinc-700 mb-4" />
+              <p className="text-zinc-500 text-sm font-medium">No blocks match your search</p>
+              <button
+                onClick={() => { setSearchQuery(""); setFilterType("All") }}
+                className="mt-3 text-emerald-500 text-xs font-bold hover:underline"
+              >
+                Clear filters
+              </button>
+            </div>
+          ) : isFiltering ? (
+            <div className="space-y-3">
+              {filteredBlocks.map((block, index) => (
+                <BlockItem
+                  key={block.id}
+                  block={block}
+                  onToggle={onToggleBlock}
+                  onDelete={onDeleteBlock}
+                  onEdit={setEditingBlockId}
+                  onDuplicate={onDuplicateBlock}
+                  onMoveUp={handleMoveUp}
+                  onMoveDown={handleMoveDown}
+                  isFirst={index === 0}
+                  isLast={index === filteredBlocks.length - 1}
+                />
+              ))}
+            </div>
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+              modifiers={[restrictToVerticalAxis]}
+            >
+              <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-3">
+                  {blocks.map((block, index) => (
+                    <BlockItem
+                      key={block.id}
+                      block={block}
+                      onToggle={onToggleBlock}
+                      onDelete={onDeleteBlock}
+                      onEdit={setEditingBlockId}
+                      onDuplicate={onDuplicateBlock}
+                      onMoveUp={handleMoveUp}
+                      onMoveDown={handleMoveDown}
+                      isFirst={index === 0}
+                      isLast={index === blocks.length - 1}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
         </div>
       </div>
       <div className="hidden xl:flex flex-col items-center">

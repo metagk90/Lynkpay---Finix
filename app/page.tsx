@@ -98,6 +98,20 @@ export default function Page() {
     setBlocks(blocks.map((b) => (b.id === updated.id ? updated : b)))
   }
 
+  const handleReorderBlocks = (reordered: Block[]) => {
+    setBlocks(reordered)
+  }
+
+  const handleDuplicateBlock = (id: number) => {
+    const original = blocks.find((b) => b.id === id)
+    if (!original) return
+    const idx = blocks.findIndex((b) => b.id === id)
+    const duplicate: Block = { ...original, id: Date.now(), title: `${original.title} (copy)` }
+    const updated = [...blocks]
+    updated.splice(idx + 1, 0, duplicate)
+    setBlocks(updated)
+  }
+
   const toggleTab = (tab: string) => {
     setActiveTab(tab)
     setIsSidebarOpen(false)
@@ -225,6 +239,8 @@ export default function Page() {
             onToggleBlock={handleToggleBlock}
             onDeleteBlock={handleDeleteBlock}
             onUpdateBlock={handleUpdateBlock}
+            onReorderBlocks={handleReorderBlocks}
+            onDuplicateBlock={handleDuplicateBlock}
             appearance={appearance}
             currency={userCurrency}
           />
