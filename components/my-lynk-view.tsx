@@ -109,7 +109,7 @@ export function MyLynkView({ onShowPreview, blocks, onAddBlock, onToggleBlock, o
 
   return (
     <>
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 grid grid-cols-1 xl:grid-cols-3 gap-10">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 grid grid-cols-1 xl:grid-cols-3 gap-10 items-start">
       <div className="xl:col-span-2 space-y-8">
         <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800/50 shadow-xl">
           <div className="flex flex-col md:flex-row items-center gap-4">

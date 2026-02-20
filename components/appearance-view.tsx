@@ -90,7 +90,7 @@ export function AppearanceView({ blocks, appearance, onChange }: AppearanceViewP
   }
 
   return (
-    <div className="flex gap-8">
+    <div className="flex gap-8 items-start">
       {/* Hidden file inputs */}
       <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, "bannerImage")} />
       <input type="file" ref={profileInputRef} className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, "profileImage")} />
