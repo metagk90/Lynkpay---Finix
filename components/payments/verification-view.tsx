@@ -289,13 +289,17 @@ export function VerificationView() {
     }
     setAddingBank(true)
     try {
+      // Finix requires ISO 3166-1 alpha-3 country codes for payment instruments
+      const countryAlpha3Map: Record<string, string> = { US: "USA", CA: "CAN", GB: "GBR", AU: "AUS", DE: "DEU", FR: "FRA", MX: "MEX", BR: "BRA", IN: "IND", JP: "JPN", CN: "CHN", KR: "KOR", NG: "NGA", GH: "GHA", KE: "KEN", ZA: "ZAF", SG: "SGP" }
+      const alpha3Country = countryAlpha3Map[country.toUpperCase()] || country
+
       const payload = {
         type: "BANK_ACCOUNT",
         name: accountName || `${firstName} ${lastName}`,
         account_number: accountNumber,
         bank_code: routingNumber,
         account_type: accountType,
-        country,
+        country: alpha3Country,
         currency: "USD",
       }
       console.log("[v0] Sending bank account payload:", payload)
@@ -308,7 +312,8 @@ export function VerificationView() {
       console.log("[v0] Bank account response:", res.status, data)
       if (!res.ok) {
         console.error("[v0] Bank account creation failed:", data)
-        setBankMessage({ type: "error", text: data?.error || "Failed to add bank account. Please check your details and try again." })
+        const errMsg = data?._embedded?.errors?.[0]?.message || data?.error || "Failed to add bank account. Please check your details and try again."
+        setBankMessage({ type: "error", text: errMsg })
       } else {
         mutatePi()
         setAccountNumber("")
