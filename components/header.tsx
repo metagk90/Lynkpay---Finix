@@ -21,7 +21,7 @@ export function Header() {
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center">
-          <Image src="/lynkpay-logo.svg" alt="LynkPay Logo" width={120} height={32} priority />
+          <Image src="/logo.svg" alt="LynkPay Logo" width={120} height={32} priority />
         </Link>
 
         {/* Desktop Nav */}

@@ -59,7 +59,7 @@ export function Footer() {
           <div className="flex flex-col gap-8 lg:flex-row lg:gap-16">
             <div className="max-w-xs">
               <Link href="/" className="inline-block">
-                <Image src="/lynkpay-logo.svg" alt="LynkPay Logo" width={120} height={32} />
+                <Image src="/logo.svg" alt="LynkPay Logo" width={120} height={32} />
               </Link>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
                 Powering the creator economy. Build your mobile webpage, sell your knowledge, and connect with your audience -- all from one link.
