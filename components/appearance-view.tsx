@@ -233,6 +233,304 @@ export function AppearanceView({ blocks, appearance, onChange }: AppearanceViewP
           </div>
         </section>
 
+        {/* Profile Effects */}
+        <section className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-6 border border-zinc-800/50 space-y-6">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <h2 className="text-lg font-black text-white uppercase tracking-tight">Profile Effects</h2>
+              <span className="bg-emerald-500/15 text-emerald-400 text-[9px] px-2 py-0.5 rounded font-black uppercase tracking-wider border border-emerald-500/25">NEW</span>
+            </div>
+            <p className="text-sm text-zinc-500">Customize your profile picture shape, animated borders, and badge.</p>
+          </div>
+
+          {/* Profile Shape */}
+          <div>
+            <h3 className="text-sm font-bold text-zinc-300 mb-4">Shape</h3>
+            <div className="flex gap-4">
+              {([
+                { key: "circle" as const, label: "Circle" },
+                { key: "rounded-square" as const, label: "Rounded Square" },
+                { key: "hexagon" as const, label: "Hexagon" },
+              ]).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => onChange({ profileShape: opt.key })}
+                  className={`flex flex-col items-center gap-2.5 py-3 px-5 rounded-2xl border-2 transition-all ${
+                    a.profileShape === opt.key
+                      ? "border-emerald-500 bg-emerald-500/5"
+                      : "border-zinc-800 bg-zinc-900/60 hover:border-zinc-700"
+                  }`}
+                >
+                  <div
+                    className={`w-10 h-10 bg-zinc-700 flex items-center justify-center ${
+                      opt.key === "circle" ? "rounded-full"
+                        : opt.key === "rounded-square" ? "rounded-xl"
+                        : "hexagon-clip"
+                    }`}
+                  >
+                    <User size={16} className="text-zinc-400" />
+                  </div>
+                  <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">{opt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Border Effect */}
+          <div>
+            <h3 className="text-sm font-bold text-zinc-300 mb-4">Border Effect</h3>
+            <div className="grid grid-cols-4 gap-3">
+              {([
+                { key: "none" as const, label: "None" },
+                { key: "solid" as const, label: "Solid" },
+                { key: "gradient-spin" as const, label: "Gradient Spin" },
+                { key: "glow-pulse" as const, label: "Glow Pulse" },
+              ]).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => onChange({ profileBorderEffect: opt.key })}
+                  className={`py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
+                    a.profileBorderEffect === opt.key
+                      ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                      : "border-zinc-700 bg-zinc-800/60 text-zinc-400 hover:border-zinc-600"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Border Colors (only when not "none") */}
+          {a.profileBorderEffect !== "none" && (
+            <div className="space-y-4 animate-in slide-in-from-top-2 fade-in duration-200">
+              <div className="flex gap-6">
+                <div className="flex-1">
+                  <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
+                    {a.profileBorderEffect === "solid" ? "Border Color" : "Color 1"}
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <label className="relative w-10 h-10 rounded-xl border border-zinc-700 shrink-0 overflow-hidden cursor-pointer">
+                      <input type="color" value={a.profileBorderColor1} onChange={(e) => onChange({ profileBorderColor1: e.target.value })} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                      <div className="w-full h-full" style={{ backgroundColor: a.profileBorderColor1 }} />
+                    </label>
+                    <input
+                      type="text"
+                      value={a.profileBorderColor1}
+                      onChange={(e) => onChange({ profileBorderColor1: e.target.value })}
+                      className="bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-300 font-mono focus:outline-none focus:border-emerald-500/50 w-full"
+                    />
+                  </div>
+                </div>
+                {a.profileBorderEffect !== "solid" && (
+                  <div className="flex-1">
+                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">Color 2</label>
+                    <div className="flex items-center gap-3">
+                      <label className="relative w-10 h-10 rounded-xl border border-zinc-700 shrink-0 overflow-hidden cursor-pointer">
+                        <input type="color" value={a.profileBorderColor2} onChange={(e) => onChange({ profileBorderColor2: e.target.value })} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                        <div className="w-full h-full" style={{ backgroundColor: a.profileBorderColor2 }} />
+                      </label>
+                      <input
+                        type="text"
+                        value={a.profileBorderColor2}
+                        onChange={(e) => onChange({ profileBorderColor2: e.target.value })}
+                        className="bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-300 font-mono focus:outline-none focus:border-emerald-500/50 w-full"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+              {/* Border Width */}
+              <div>
+                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">Border Width</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min={1}
+                    max={5}
+                    value={a.profileBorderWidth}
+                    onChange={(e) => onChange({ profileBorderWidth: Number(e.target.value) })}
+                    className="flex-1 accent-emerald-500 h-1.5"
+                  />
+                  <span className="text-xs font-mono text-zinc-400 w-8 text-right">{a.profileBorderWidth}px</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Badge */}
+          <div>
+            <h3 className="text-sm font-bold text-zinc-300 mb-4">Badge</h3>
+            <div className="flex gap-3">
+              {([
+                { key: "none" as const, label: "None", icon: null },
+                { key: "verified" as const, label: "Verified", icon: "checkmark" },
+                { key: "star" as const, label: "Star", icon: "star" },
+                { key: "crown" as const, label: "Crown", icon: "crown" },
+              ]).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => onChange({ profileBadge: opt.key })}
+                  className={`flex-1 flex flex-col items-center gap-2 py-3 rounded-xl border-2 transition-all ${
+                    a.profileBadge === opt.key
+                      ? "border-emerald-500 bg-emerald-500/10"
+                      : "border-zinc-700 bg-zinc-800/60 hover:border-zinc-600"
+                  }`}
+                >
+                  <div className="w-6 h-6 flex items-center justify-center">
+                    {opt.key === "none" ? (
+                      <span className="text-zinc-600 text-lg">-</span>
+                    ) : opt.key === "verified" ? (
+                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill={a.profileBadge === opt.key ? a.profileBadgeColor : "#52525b"}>
+                        <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke="currentColor" strokeWidth="0" />
+                        <circle cx="12" cy="12" r="10" fill={a.profileBadge === opt.key ? a.profileBadgeColor : "#52525b"} />
+                        <path d="M9 12l2 2 4-4" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    ) : opt.key === "star" ? (
+                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill={a.profileBadge === opt.key ? a.profileBadgeColor : "#52525b"}>
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill={a.profileBadge === opt.key ? a.profileBadgeColor : "#52525b"}>
+                        <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 0l.858 4.573A1 1 0 006.843 21.5h10.314a1 1 0 00.985-.927L18.999 16H5z" />
+                      </svg>
+                    )}
+                  </div>
+                  <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">{opt.label}</span>
+                </button>
+              ))}
+            </div>
+            {a.profileBadge !== "none" && (
+              <div className="mt-4 animate-in slide-in-from-top-2 fade-in duration-200">
+                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">Badge Color</label>
+                <div className="flex items-center gap-3">
+                  <label className="relative w-10 h-10 rounded-xl border border-zinc-700 shrink-0 overflow-hidden cursor-pointer">
+                    <input type="color" value={a.profileBadgeColor} onChange={(e) => onChange({ profileBadgeColor: e.target.value })} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                    <div className="w-full h-full" style={{ backgroundColor: a.profileBadgeColor }} />
+                  </label>
+                  <input
+                    type="text"
+                    value={a.profileBadgeColor}
+                    onChange={(e) => onChange({ profileBadgeColor: e.target.value })}
+                    className="bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-300 font-mono focus:outline-none focus:border-emerald-500/50 w-40"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Header Style */}
+        <section className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-6 border border-zinc-800/50 space-y-6">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <h2 className="text-lg font-black text-white uppercase tracking-tight">Header Style</h2>
+              <span className="bg-emerald-500/15 text-emerald-400 text-[9px] px-2 py-0.5 rounded font-black uppercase tracking-wider border border-emerald-500/25">NEW</span>
+            </div>
+            <p className="text-sm text-zinc-500">Style your display name and banner overlay.</p>
+          </div>
+
+          {/* Text Effect */}
+          <div>
+            <h3 className="text-sm font-bold text-zinc-300 mb-4">Display Name Effect</h3>
+            <div className="grid grid-cols-5 gap-3">
+              {([
+                { key: "none" as const, label: "Plain" },
+                { key: "gradient" as const, label: "Gradient" },
+                { key: "outline" as const, label: "Outline" },
+                { key: "glow" as const, label: "Glow" },
+                { key: "shadow" as const, label: "Shadow" },
+              ]).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => onChange({ headerTextEffect: opt.key })}
+                  className={`py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
+                    a.headerTextEffect === opt.key
+                      ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                      : "border-zinc-700 bg-zinc-800/60 text-zinc-400 hover:border-zinc-600"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Gradient colors (only for gradient effect) */}
+          {a.headerTextEffect === "gradient" && (
+            <div className="flex gap-6 animate-in slide-in-from-top-2 fade-in duration-200">
+              <div className="flex-1">
+                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">Color 1</label>
+                <div className="flex items-center gap-3">
+                  <label className="relative w-10 h-10 rounded-xl border border-zinc-700 shrink-0 overflow-hidden cursor-pointer">
+                    <input type="color" value={a.headerGradientColor1} onChange={(e) => onChange({ headerGradientColor1: e.target.value })} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                    <div className="w-full h-full" style={{ backgroundColor: a.headerGradientColor1 }} />
+                  </label>
+                  <input type="text" value={a.headerGradientColor1} onChange={(e) => onChange({ headerGradientColor1: e.target.value })} className="bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-300 font-mono focus:outline-none focus:border-emerald-500/50 w-full" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">Color 2</label>
+                <div className="flex items-center gap-3">
+                  <label className="relative w-10 h-10 rounded-xl border border-zinc-700 shrink-0 overflow-hidden cursor-pointer">
+                    <input type="color" value={a.headerGradientColor2} onChange={(e) => onChange({ headerGradientColor2: e.target.value })} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                    <div className="w-full h-full" style={{ backgroundColor: a.headerGradientColor2 }} />
+                  </label>
+                  <input type="text" value={a.headerGradientColor2} onChange={(e) => onChange({ headerGradientColor2: e.target.value })} className="bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-300 font-mono focus:outline-none focus:border-emerald-500/50 w-full" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Text Alignment */}
+          <div>
+            <h3 className="text-sm font-bold text-zinc-300 mb-4">Alignment</h3>
+            <div className="flex gap-3">
+              {([
+                { key: "center" as const, label: "Center" },
+                { key: "left" as const, label: "Left" },
+              ]).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => onChange({ headerAlignment: opt.key })}
+                  className={`flex-1 py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
+                    a.headerAlignment === opt.key
+                      ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                      : "border-zinc-700 bg-zinc-800/60 text-zinc-400 hover:border-zinc-600"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Banner Overlay */}
+          <div>
+            <h3 className="text-sm font-bold text-zinc-300 mb-4">Banner Overlay</h3>
+            <div className="grid grid-cols-4 gap-3">
+              {([
+                { key: "none" as const, label: "None" },
+                { key: "gradient-fade" as const, label: "Gradient" },
+                { key: "darken" as const, label: "Darken" },
+                { key: "blur" as const, label: "Blur" },
+              ]).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => onChange({ bannerOverlay: opt.key })}
+                  className={`py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
+                    a.bannerOverlay === opt.key
+                      ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                      : "border-zinc-700 bg-zinc-800/60 text-zinc-400 hover:border-zinc-600"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Color */}
         <section className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-6 border border-zinc-800/50 space-y-4">
           <h2 className="text-lg font-black text-white uppercase tracking-tight">Color</h2>
@@ -410,6 +708,94 @@ export function AppearanceView({ blocks, appearance, onChange }: AppearanceViewP
           </div>
         </section>
 
+        {/* Background Effects */}
+        <section className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-6 border border-zinc-800/50 space-y-6">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <h2 className="text-lg font-black text-white uppercase tracking-tight">Background Effects</h2>
+              <span className="bg-emerald-500/15 text-emerald-400 text-[9px] px-2 py-0.5 rounded font-black uppercase tracking-wider border border-emerald-500/25">NEW</span>
+            </div>
+            <p className="text-sm text-zinc-500">Add animated effects and overlays to your background.</p>
+          </div>
+
+          {/* Effect Type */}
+          <div>
+            <h3 className="text-sm font-bold text-zinc-300 mb-4">Effect</h3>
+            <div className="grid grid-cols-4 gap-3">
+              {([
+                { key: "none" as const, label: "None", desc: "No effect" },
+                { key: "animated-gradient" as const, label: "Animated", desc: "Shifting gradient" },
+                { key: "particles" as const, label: "Particles", desc: "Floating dots" },
+                { key: "noise" as const, label: "Grain", desc: "Film grain" },
+              ]).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => onChange({ bgEffect: opt.key })}
+                  className={`rounded-xl border-2 p-3 flex flex-col items-center gap-1.5 transition-all ${
+                    a.bgEffect === opt.key
+                      ? "border-emerald-500 bg-emerald-500/5"
+                      : "border-zinc-800 bg-zinc-900/60 hover:border-zinc-700"
+                  }`}
+                >
+                  <span className="text-xs font-bold text-zinc-300">{opt.label}</span>
+                  <span className="text-[8px] text-zinc-600">{opt.desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Gradient Speed (only for animated-gradient) */}
+          {a.bgEffect === "animated-gradient" && (
+            <div className="animate-in slide-in-from-top-2 fade-in duration-200">
+              <h3 className="text-sm font-bold text-zinc-300 mb-3">Animation Speed</h3>
+              <div className="flex gap-3">
+                {([
+                  { key: "slow" as const, label: "Slow" },
+                  { key: "medium" as const, label: "Medium" },
+                  { key: "fast" as const, label: "Fast" },
+                ]).map((opt) => (
+                  <button
+                    key={opt.key}
+                    onClick={() => onChange({ bgGradientSpeed: opt.key })}
+                    className={`flex-1 py-2 rounded-xl border-2 text-xs font-bold transition-all ${
+                      a.bgGradientSpeed === opt.key
+                        ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                        : "border-zinc-700 bg-zinc-800/60 text-zinc-400 hover:border-zinc-600"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Overlay */}
+          <div>
+            <h3 className="text-sm font-bold text-zinc-300 mb-4">Overlay</h3>
+            <div className="grid grid-cols-4 gap-3">
+              {([
+                { key: "none" as const, label: "None" },
+                { key: "vignette" as const, label: "Vignette" },
+                { key: "dark-fade" as const, label: "Dark Fade" },
+                { key: "light-fade" as const, label: "Light Fade" },
+              ]).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => onChange({ bgOverlay: opt.key })}
+                  className={`py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
+                    a.bgOverlay === opt.key
+                      ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                      : "border-zinc-700 bg-zinc-800/60 text-zinc-400 hover:border-zinc-600"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Fonts */}
         <section className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-6 border border-zinc-800/50 space-y-5">
           <h2 className="text-lg font-black text-white uppercase tracking-tight">Fonts</h2>
@@ -541,6 +927,258 @@ export function AppearanceView({ blocks, appearance, onChange }: AppearanceViewP
             </div>
             <span className="text-sm font-bold text-zinc-300">Apply soft shadow</span>
           </label>
+        </section>
+
+        {/* Card Style */}
+        <section className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-6 border border-zinc-800/50 space-y-6">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <h2 className="text-lg font-black text-white uppercase tracking-tight">Card Style</h2>
+              <span className="bg-emerald-500/15 text-emerald-400 text-[9px] px-2 py-0.5 rounded font-black uppercase tracking-wider border border-emerald-500/25">NEW</span>
+            </div>
+            <p className="text-sm text-zinc-500">Control how your block cards look -- style, corners, borders, shadows & transparency.</p>
+          </div>
+
+          {/* Card Style Picker */}
+          <div>
+            <h3 className="text-sm font-bold text-zinc-300 mb-4">Style</h3>
+            <div className="grid grid-cols-4 gap-3">
+              {([
+                { key: "flat" as const, label: "Flat", desc: "Solid background" },
+                { key: "glass" as const, label: "Glass", desc: "Frosted blur" },
+                { key: "elevated" as const, label: "Elevated", desc: "Lifted shadow" },
+                { key: "bordered" as const, label: "Bordered", desc: "Clean border" },
+              ]).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => onChange({ cardStyle: opt.key })}
+                  className={`rounded-2xl border-2 p-4 flex flex-col items-center gap-2 transition-all ${
+                    a.cardStyle === opt.key
+                      ? "border-emerald-500 bg-emerald-500/5"
+                      : "border-zinc-800 bg-zinc-900/60 hover:border-zinc-700"
+                  }`}
+                >
+                  {/* Mini preview */}
+                  <div
+                    className="w-full aspect-[4/3] rounded-lg flex items-center justify-center"
+                    style={{
+                      backgroundColor: opt.key === "flat" ? `${a.blockColor}18` : opt.key === "glass" ? `${a.blockColor}0c` : opt.key === "elevated" ? `${a.blockColor}12` : "transparent",
+                      backdropFilter: opt.key === "glass" ? "blur(8px)" : "none",
+                      border: opt.key === "bordered" ? `2px solid ${a.blockColor}40` : opt.key === "glass" ? `1px solid ${a.blockColor}20` : "none",
+                      boxShadow: opt.key === "elevated" ? `0 8px 24px ${a.blockColor}15` : "none",
+                    }}
+                  >
+                    <div className="space-y-1.5 w-3/4">
+                      <div className="h-1.5 rounded-full" style={{ backgroundColor: `${a.blockColor}40`, width: "70%" }} />
+                      <div className="h-1.5 rounded-full" style={{ backgroundColor: `${a.blockColor}25`, width: "100%" }} />
+                      <div className="h-1.5 rounded-full" style={{ backgroundColor: `${a.blockColor}25`, width: "50%" }} />
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">{opt.label}</span>
+                  <span className="text-[8px] text-zinc-600">{opt.desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Card Corner Radius */}
+          <div>
+            <h3 className="text-sm font-bold text-zinc-300 mb-4">Corner Radius</h3>
+            <div className="flex gap-3">
+              {([
+                { key: "none" as const, label: "Sharp", radius: "rounded-none" },
+                { key: "sm" as const, label: "Small", radius: "rounded" },
+                { key: "md" as const, label: "Medium", radius: "rounded-lg" },
+                { key: "lg" as const, label: "Large", radius: "rounded-2xl" },
+                { key: "full" as const, label: "Full", radius: "rounded-3xl" },
+              ]).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => onChange({ cardRadius: opt.key })}
+                  className={`flex-1 flex flex-col items-center gap-2 py-3 transition-all ${
+                    a.cardRadius === opt.key ? "opacity-100" : "opacity-40 hover:opacity-70"
+                  }`}
+                >
+                  <div
+                    className={`w-12 h-12 border-2 transition-all ${opt.radius} ${
+                      a.cardRadius === opt.key ? "border-emerald-500 bg-emerald-500/15" : "border-zinc-600 bg-zinc-800/60"
+                    }`}
+                  />
+                  <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">{opt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Card Border */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-zinc-300">Card Border</h3>
+              <Toggle value={a.cardBorderEnabled} onChange={(v) => onChange({ cardBorderEnabled: v })} />
+            </div>
+            {a.cardBorderEnabled && (
+              <div className="space-y-4 animate-in slide-in-from-top-2 fade-in duration-200">
+                <div className="flex gap-6">
+                  {/* Border Width */}
+                  <div className="flex-1">
+                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">Width</label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min={1}
+                        max={4}
+                        value={a.cardBorderWidth}
+                        onChange={(e) => onChange({ cardBorderWidth: Number(e.target.value) })}
+                        className="flex-1 accent-emerald-500 h-1.5"
+                      />
+                      <span className="text-xs font-mono text-zinc-400 w-8 text-right">{a.cardBorderWidth}px</span>
+                    </div>
+                  </div>
+                  {/* Border Opacity */}
+                  <div className="flex-1">
+                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">Opacity</label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min={5}
+                        max={100}
+                        value={a.cardBorderOpacity}
+                        onChange={(e) => onChange({ cardBorderOpacity: Number(e.target.value) })}
+                        className="flex-1 accent-emerald-500 h-1.5"
+                      />
+                      <span className="text-xs font-mono text-zinc-400 w-10 text-right">{a.cardBorderOpacity}%</span>
+                    </div>
+                  </div>
+                </div>
+                {/* Border Color */}
+                <div>
+                  <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">Border Color</label>
+                  <div className="flex items-center gap-3">
+                    <label className="relative w-10 h-10 rounded-xl border border-zinc-700 shrink-0 overflow-hidden cursor-pointer">
+                      <input type="color" value={a.cardBorderColor} onChange={(e) => onChange({ cardBorderColor: e.target.value })} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                      <div className="w-full h-full" style={{ backgroundColor: a.cardBorderColor }} />
+                    </label>
+                    <input
+                      type="text"
+                      value={a.cardBorderColor}
+                      onChange={(e) => onChange({ cardBorderColor: e.target.value })}
+                      className="bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-300 font-mono focus:outline-none focus:border-emerald-500/50 w-40"
+                    />
+                    <button
+                      onClick={() => onChange({ cardBorderColor: a.blockColor })}
+                      className="px-3 py-2 rounded-lg border border-zinc-700 text-[10px] font-bold text-zinc-400 hover:border-emerald-500/40 hover:text-emerald-400 transition-all"
+                    >
+                      Match Block
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Card Shadow */}
+          <div>
+            <h3 className="text-sm font-bold text-zinc-300 mb-4">Shadow</h3>
+            <div className="flex gap-3 mb-4">
+              {([
+                { key: "none" as const, label: "None" },
+                { key: "subtle" as const, label: "Subtle" },
+                { key: "medium" as const, label: "Medium" },
+                { key: "bold" as const, label: "Bold" },
+              ]).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => onChange({ cardShadow: opt.key })}
+                  className={`flex-1 py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
+                    a.cardShadow === opt.key
+                      ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                      : "border-zinc-700 bg-zinc-800/60 text-zinc-400 hover:border-zinc-600"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            {a.cardShadow !== "none" && (
+              <div className="animate-in slide-in-from-top-2 fade-in duration-200">
+                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">Shadow Color</label>
+                <div className="flex items-center gap-3">
+                  <label className="relative w-10 h-10 rounded-xl border border-zinc-700 shrink-0 overflow-hidden cursor-pointer">
+                    <input type="color" value={a.cardShadowColor} onChange={(e) => onChange({ cardShadowColor: e.target.value })} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                    <div className="w-full h-full" style={{ backgroundColor: a.cardShadowColor }} />
+                  </label>
+                  <input
+                    type="text"
+                    value={a.cardShadowColor}
+                    onChange={(e) => onChange({ cardShadowColor: e.target.value })}
+                    className="bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-zinc-300 font-mono focus:outline-none focus:border-emerald-500/50 w-40"
+                  />
+                  <button
+                    onClick={() => onChange({ cardShadowColor: a.blockColor })}
+                    className="px-3 py-2 rounded-lg border border-zinc-700 text-[10px] font-bold text-zinc-400 hover:border-emerald-500/40 hover:text-emerald-400 transition-all"
+                  >
+                    Match Block
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Card Opacity */}
+          <div>
+            <h3 className="text-sm font-bold text-zinc-300 mb-4">Card Opacity</h3>
+            <div className="flex items-center gap-4">
+              <input
+                type="range"
+                min={20}
+                max={100}
+                value={a.cardOpacity}
+                onChange={(e) => onChange({ cardOpacity: Number(e.target.value) })}
+                className="flex-1 accent-emerald-500 h-1.5"
+              />
+              <span className="text-sm font-mono text-zinc-400 w-12 text-right">{a.cardOpacity}%</span>
+            </div>
+            <p className="text-[11px] text-zinc-600 mt-2">Lower values reveal more of the background through cards</p>
+          </div>
+        </section>
+
+        {/* Block Hover Animations */}
+        <section className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-6 border border-zinc-800/50 space-y-6">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <h2 className="text-lg font-black text-white uppercase tracking-tight">Block Hover Effect</h2>
+              <span className="bg-emerald-500/15 text-emerald-400 text-[9px] px-2 py-0.5 rounded font-black uppercase tracking-wider border border-emerald-500/25">NEW</span>
+            </div>
+            <p className="text-sm text-zinc-500">Choose what happens when visitors hover over your blocks.</p>
+          </div>
+
+          <div className="grid grid-cols-5 gap-3">
+            {([
+              { key: "none" as const, label: "None", desc: "Static" },
+              { key: "lift" as const, label: "Lift", desc: "Floats up" },
+              { key: "scale" as const, label: "Scale", desc: "Zooms in" },
+              { key: "glow" as const, label: "Glow", desc: "Color glow" },
+              { key: "tilt" as const, label: "Tilt", desc: "3D tilt" },
+            ]).map((opt) => (
+              <button
+                key={opt.key}
+                onClick={() => onChange({ blockHover: opt.key })}
+                className={`rounded-xl border-2 p-3 flex flex-col items-center gap-1.5 transition-all ${
+                  a.blockHover === opt.key
+                    ? "border-emerald-500 bg-emerald-500/5"
+                    : "border-zinc-800 bg-zinc-900/60 hover:border-zinc-700"
+                }`}
+              >
+                <div
+                  className={`w-10 h-6 rounded bg-zinc-700 transition-all ${
+                    opt.key === "lift" ? "hover:-translate-y-0.5" : opt.key === "scale" ? "hover:scale-105" : ""
+                  }`}
+                />
+                <span className="text-[10px] font-bold text-zinc-400">{opt.label}</span>
+                <span className="text-[8px] text-zinc-600">{opt.desc}</span>
+              </button>
+            ))}
+          </div>
         </section>
 
         <div className="pb-8" />

@@ -35,7 +35,29 @@ function getButtonRadius(shape: AppearanceConfig["buttonShape"]) {
   if (shape === "square") return "6px"
   if (shape === "pill") return "9999px"
   return "12px"
-}
+  }
+
+  function getCardRadius(radius: AppearanceConfig["cardRadius"]) {
+    if (radius === "none") return "0px"
+    if (radius === "sm") return "6px"
+    if (radius === "md") return "12px"
+    if (radius === "lg") return "20px"
+    if (radius === "full") return "28px"
+    return "12px"
+  }
+
+  function hexToRgb(hex: string) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+    return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : { r: 0, g: 0, b: 0 }
+  }
+
+  function getCardShadow(level: AppearanceConfig["cardShadow"], color: string) {
+    const { r, g, b } = hexToRgb(color)
+    if (level === "subtle") return `0 2px 8px rgba(${r},${g},${b},0.08)`
+    if (level === "medium") return `0 4px 20px rgba(${r},${g},${b},0.15)`
+    if (level === "bold") return `0 8px 40px rgba(${r},${g},${b},0.25), 0 2px 8px rgba(${r},${g},${b},0.1)`
+    return "none"
+  }
 
 function getSocialIcon(name: string) {
   const icons: Record<string, string> = {
@@ -498,7 +520,41 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
               onBack={() => setCheckoutBlock(null)}
             />
           ) : (
-            <div className="flex flex-col h-full overflow-y-auto no-scrollbar pt-10 px-4" style={bgStyle}>
+            <div
+              className={`relative flex flex-col h-full overflow-y-auto no-scrollbar pt-10 px-4 ${
+                a.bgEffect === "noise" ? "bg-noise" : ""
+              } ${
+                a.bgOverlay === "vignette" ? "bg-vignette" : a.bgOverlay === "dark-fade" ? "bg-dark-fade" : a.bgOverlay === "light-fade" ? "bg-light-fade" : ""
+              }`}
+              style={{
+                ...bgStyle,
+                ...(a.bgEffect === "animated-gradient" ? {
+                  background: `linear-gradient(-45deg, ${a.bgColor}, ${a.bgColor}88, ${a.blockColor}44, ${a.bgColor})`,
+                  backgroundSize: "400% 400%",
+                  animation: `bg-gradient-shift ${a.bgGradientSpeed === "slow" ? "12s" : a.bgGradientSpeed === "fast" ? "4s" : "7s"} ease infinite`,
+                } : {}),
+              }}
+            >
+              {/* Floating particles */}
+              {a.bgEffect === "particles" && (
+                <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute rounded-full"
+                      style={{
+                        width: `${2 + (i % 3) * 1.5}px`,
+                        height: `${2 + (i % 3) * 1.5}px`,
+                        backgroundColor: `${a.textColor}${20 + (i % 3) * 10}`,
+                        left: `${8 + (i * 7.5) % 84}%`,
+                        bottom: `${(i * 13) % 60}%`,
+                        animation: `float-particle ${5 + (i % 4) * 2}s ease-in-out infinite`,
+                        animationDelay: `${(i * 0.7)}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
               {/* Top bar */}
               <div className="flex justify-between items-center mb-8 px-2">
                 <span className="text-xs font-black italic" style={{ color: a.textColor }}>
@@ -512,39 +568,111 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
 
               {/* Banner (if layout is classic and has banner) */}
               {a.layout === "classic" && a.bannerImage && (
-                <div className="w-full aspect-[16/7] rounded-xl overflow-hidden mb-4 -mt-2">
+                <div className="w-full aspect-[16/7] rounded-xl overflow-hidden mb-4 -mt-2 relative">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={a.bannerImage} className="w-full h-full object-cover" alt="banner" crossOrigin="anonymous" />
+                  <img
+                    src={a.bannerImage}
+                    className={`w-full h-full object-cover ${a.bannerOverlay === "blur" ? "blur-[2px] scale-105" : ""}`}
+                    alt="banner"
+                    crossOrigin="anonymous"
+                  />
+                  {a.bannerOverlay === "gradient-fade" && (
+                    <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, transparent 30%, ${a.bgColor})` }} />
+                  )}
+                  {a.bannerOverlay === "darken" && (
+                    <div className="absolute inset-0 bg-black/40" />
+                  )}
                 </div>
               )}
 
               {/* Profile section */}
               {a.layout !== "clean" && (
-                <div className="flex flex-col items-center mb-6">
-                  <div
-                    className="w-14 h-14 rounded-full border-2 p-0.5 mb-3 overflow-hidden"
-                    style={{ borderColor: a.blockColor }}
-                  >
-                    {a.profileImage ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={a.profileImage}
-                        className="w-full h-full rounded-full object-cover"
-                        alt="profile"
-                        crossOrigin="anonymous"
-                      />
-                    ) : (
-                      <div className="w-full h-full rounded-full bg-zinc-800 flex items-center justify-center">
-                        <User size={28} style={{ color: a.blockColor }} />
+                <div className={`flex flex-col ${a.headerAlignment === "left" ? "items-start pl-2" : "items-center"} mb-6`}>
+                  {/* Profile image with effects */}
+                  <div className="relative mb-3">
+                    <div
+                      className={`w-14 h-14 relative z-10 p-0.5 overflow-hidden ${
+                        a.profileShape === "rounded-square" ? "rounded-xl"
+                          : a.profileShape === "hexagon" ? "hexagon-clip"
+                          : "rounded-full"
+                      } ${
+                        a.profileBorderEffect === "gradient-spin" ? "profile-gradient-spin"
+                          : a.profileBorderEffect === "glow-pulse" ? "profile-glow-pulse"
+                          : ""
+                      }`}
+                      style={{
+                        border: a.profileBorderEffect === "solid" ? `${a.profileBorderWidth ?? 2}px solid ${a.profileBorderColor1}` : a.profileBorderEffect === "none" ? "none" : undefined,
+                        "--profile-color1": a.profileBorderColor1 ?? a.blockColor,
+                        "--profile-color2": a.profileBorderColor2 ?? "#06b6d4",
+                      } as React.CSSProperties}
+                    >
+                      <div className={`w-full h-full overflow-hidden ${
+                        a.profileShape === "rounded-square" ? "rounded-[10px]"
+                          : a.profileShape === "hexagon" ? "hexagon-clip"
+                          : "rounded-full"
+                      }`}>
+                        {a.profileImage ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={a.profileImage}
+                            className="w-full h-full object-cover"
+                            alt="profile"
+                            crossOrigin="anonymous"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
+                            <User size={28} style={{ color: a.blockColor }} />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {/* Badge */}
+                    {a.profileBadge && a.profileBadge !== "none" && (
+                      <div className="absolute -bottom-0.5 -right-0.5 z-20">
+                        {a.profileBadge === "verified" ? (
+                          <svg viewBox="0 0 24 24" className="w-5 h-5 drop-shadow-md">
+                            <circle cx="12" cy="12" r="10" fill={a.profileBadgeColor ?? "#3b82f6"} />
+                            <path d="M9 12l2 2 4-4" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        ) : a.profileBadge === "star" ? (
+                          <svg viewBox="0 0 24 24" className="w-5 h-5 drop-shadow-md" fill={a.profileBadgeColor ?? "#3b82f6"}>
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                          </svg>
+                        ) : a.profileBadge === "crown" ? (
+                          <svg viewBox="0 0 24 24" className="w-5 h-5 drop-shadow-md" fill={a.profileBadgeColor ?? "#3b82f6"}>
+                            <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 0l.858 4.573A1 1 0 006.843 21.5h10.314a1 1 0 00.985-.927L18.999 16H5z" />
+                          </svg>
+                        ) : null}
                       </div>
                     )}
                   </div>
-                  <p className="font-black text-sm" style={{ color: a.textColor }}>
+                  <p
+                    className="font-black text-sm"
+                    style={{
+                      ...(a.headerTextEffect === "gradient" ? {
+                        background: `linear-gradient(135deg, ${a.headerGradientColor1 ?? a.blockColor}, ${a.headerGradientColor2 ?? "#06b6d4"})`,
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                      } : a.headerTextEffect === "outline" ? {
+                        color: "transparent",
+                        WebkitTextStroke: `1px ${a.textColor}`,
+                      } : a.headerTextEffect === "glow" ? {
+                        color: a.textColor,
+                        textShadow: `0 0 8px ${a.blockColor}80, 0 0 16px ${a.blockColor}40`,
+                      } : a.headerTextEffect === "shadow" ? {
+                        color: a.textColor,
+                        textShadow: `2px 2px 4px rgba(0,0,0,0.5)`,
+                      } : {
+                        color: a.textColor,
+                      }),
+                    }}
+                  >
                     @affribute
                   </p>
                   {a.about && (
                     <p
-                      className="text-[10px] mt-1.5 text-center px-6 leading-relaxed opacity-70"
+                      className={`text-[10px] mt-1.5 px-6 leading-relaxed opacity-70 ${a.headerAlignment === "left" ? "text-left px-0" : "text-center"}`}
                       style={{ color: a.textColor }}
                     >
                       {a.about}
@@ -578,19 +706,27 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                   .filter((b) => b.active)
                   .map((block) => {
                     const isDark = a.textColor === "#f4f4f5" || a.textColor === "#ffffff"
-                    const cardBg = isDark ? "rgba(24,24,27,0.8)" : "rgba(255,255,255,0.9)"
+                    const opacity = (a.cardOpacity ?? 100) / 100
+                    const baseCardBg = isDark ? `rgba(24,24,27,${0.8 * opacity})` : `rgba(255,255,255,${0.9 * opacity})`
+                    const glassCardBg = isDark ? `rgba(24,24,27,${0.4 * opacity})` : `rgba(255,255,255,${0.4 * opacity})`
+                    const cardBg = a.cardStyle === "glass" ? glassCardBg : a.cardStyle === "bordered" ? "transparent" : baseCardBg
+                    const cardBlur = a.cardStyle === "glass" ? "blur(12px) saturate(1.4)" : "none"
                     const subtleBg = isDark ? "rgba(39,39,42,0.6)" : "rgba(243,244,246,0.8)"
-                    const shadow = a.softShadow ? `0 4px 24px ${a.blockColor}15` : "none"
+                    const shadow = a.cardShadow !== "none" ? getCardShadow(a.cardShadow, a.cardShadowColor) : a.softShadow ? `0 4px 24px ${a.blockColor}15` : a.cardStyle === "elevated" ? `0 6px 24px rgba(0,0,0,0.15)` : "none"
                     const mutedText = `${a.textColor}88`
+                    const cardR = getCardRadius(a.cardRadius ?? "md")
+                    const bdr = a.cardBorderEnabled ? `${a.cardBorderWidth ?? 1}px solid ${a.cardBorderColor}${Math.round((a.cardBorderOpacity ?? 20) * 2.55).toString(16).padStart(2, "0")}` : a.cardStyle === "bordered" ? `1.5px solid ${a.blockColor}30` : "none"
+
+                    const hoverClass = a.blockHover === "lift" ? "block-hover-lift" : a.blockHover === "scale" ? "block-hover-scale" : a.blockHover === "glow" ? "block-hover-glow" : a.blockHover === "tilt" ? "block-hover-tilt" : ""
 
                     return (
-                    <div key={block.id} className="animate-in fade-in zoom-in duration-300">
+                    <div key={block.id} className={`animate-in fade-in zoom-in duration-300 ${hoverClass}`} style={{ "--block-glow-color": `${a.blockColor}40` } as React.CSSProperties}>
 
                       {/* ── Product / Digital Product / Physical Product ── */}
                       {(block.type === "Product" || block.type === "Digital Product") ? (
                         <div
-                          className="overflow-hidden transition-shadow"
-                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                          className="overflow-hidden transition-all"
+                          style={{ borderRadius: cardR, backgroundColor: cardBg, boxShadow: shadow, backdropFilter: cardBlur, border: bdr }}
                         >
                           <div className="aspect-[16/9] bg-zinc-800 relative overflow-hidden">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -629,8 +765,8 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                       /* ── Physical Product ── */
                       ) : block.type === "Physical" || block.type === "Physical Product" ? (
                         <div
-                          className="overflow-hidden transition-shadow"
-                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                          className="overflow-hidden transition-all"
+                          style={{ borderRadius: cardR, backgroundColor: cardBg, boxShadow: shadow, backdropFilter: cardBlur, border: bdr }}
                         >
                           <div className="aspect-[16/9] bg-zinc-800 relative overflow-hidden">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -668,10 +804,10 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                       /* ── Image ── */
                       ) : block.type === "Image" ? (
                         <div
-                          className="overflow-hidden transition-shadow"
-                          style={{ borderRadius: btnRadius, boxShadow: shadow }}
+                          className="overflow-hidden transition-all"
+                          style={{ borderRadius: cardR, boxShadow: shadow, border: bdr }}
                         >
-                          <div className="aspect-[4/3] bg-zinc-800 relative overflow-hidden" style={{ borderRadius: btnRadius }}>
+                          <div className="aspect-[4/3] bg-zinc-800 relative overflow-hidden" style={{ borderRadius: cardR }}>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={block.image || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600"}
@@ -702,13 +838,14 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                       /* ── Link ── */
                       ) : block.type === "Link" ? (
                         <div
-                          className="p-3 flex items-center gap-3 transition-shadow"
+                          className="p-3 flex items-center gap-3 transition-all"
                           style={{
-                            borderRadius: btnRadius,
+                            borderRadius: cardR,
                             backgroundColor: a.buttonStyle === "fill" ? a.blockColor : cardBg,
                             color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor,
-                            border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}22`,
+                            border: a.cardBorderEnabled ? bdr : a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}22`,
                             boxShadow: shadow,
+                            backdropFilter: cardBlur,
                           }}
                         >
                           {block.image && (
@@ -729,8 +866,8 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                       /* ── Video ── */
                       ) : block.type === "Video" ? (
                         <div
-                          className="overflow-hidden transition-shadow"
-                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                          className="overflow-hidden transition-all"
+                          style={{ borderRadius: cardR, backgroundColor: cardBg, boxShadow: shadow, backdropFilter: cardBlur, border: bdr }}
                         >
                           <div className="aspect-video relative overflow-hidden flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${isDark ? "#18181b" : "#e4e4e7"}, ${isDark ? "#27272a" : "#d4d4d8"})` }}>
                             {/* Decorative lines */}
@@ -782,8 +919,8 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                       /* ── Blog ── */
                       ) : block.type === "Blog" ? (
                         <div
-                          className="overflow-hidden transition-shadow"
-                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                          className="overflow-hidden transition-all"
+                          style={{ borderRadius: cardR, backgroundColor: cardBg, boxShadow: shadow, backdropFilter: cardBlur, border: bdr }}
                         >
                           {block.image && (
                             <div className="aspect-[2/1] bg-zinc-800 relative overflow-hidden">
@@ -822,8 +959,8 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                       /* ── Appointment ── */
                       ) : block.type === "Appointment" ? (
                         <div
-                          className="overflow-hidden transition-shadow"
-                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                          className="overflow-hidden transition-all"
+                          style={{ borderRadius: cardR, backgroundColor: cardBg, boxShadow: shadow, backdropFilter: cardBlur, border: bdr }}
                         >
                           <div className="p-3">
                             <div className="flex items-center gap-2 mb-2">
@@ -862,8 +999,8 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                       /* ── Course ── */
                       ) : block.type === "Course" || block.type === "Course Video" ? (
                         <div
-                          className="overflow-hidden transition-shadow"
-                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                          className="overflow-hidden transition-all"
+                          style={{ borderRadius: cardR, backgroundColor: cardBg, boxShadow: shadow, backdropFilter: cardBlur, border: bdr }}
                         >
                           {block.image && (
                             <div className="aspect-[16/9] bg-zinc-800 relative overflow-hidden">
@@ -900,8 +1037,8 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                       /* ── Event ── */
                       ) : block.type === "Event" ? (
                         <div
-                          className="overflow-hidden transition-shadow"
-                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                          className="overflow-hidden transition-all"
+                          style={{ borderRadius: cardR, backgroundColor: cardBg, boxShadow: shadow, backdropFilter: cardBlur, border: bdr }}
                         >
                           <div className="p-3">
                             <div className="flex gap-3">
@@ -941,8 +1078,8 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                       /* ── Supports (Tip Jar) ── */
                       ) : block.type === "Supports" ? (
                         <div
-                          className="overflow-hidden transition-shadow"
-                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                          className="overflow-hidden transition-all"
+                          style={{ borderRadius: cardR, backgroundColor: cardBg, boxShadow: shadow, backdropFilter: cardBlur, border: bdr }}
                         >
                           <div className="p-3 text-center">
                             <div className="w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center" style={{ backgroundColor: `${a.blockColor}15` }}>
@@ -984,8 +1121,8 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                       /* ── Contact Form ── */
                       ) : block.type === "Contact Form" || block.type === "Contact" || block.type === "Email & Phone Number" ? (
                         <div
-                          className="overflow-hidden transition-shadow"
-                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                          className="overflow-hidden transition-all"
+                          style={{ borderRadius: cardR, backgroundColor: cardBg, boxShadow: shadow, backdropFilter: cardBlur, border: bdr }}
                         >
                           <div className="p-3">
                             <div className="flex items-center gap-2 mb-2.5">
@@ -1023,8 +1160,8 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                       /* ── Affiliate ── */
                       ) : block.type === "Affiliate" || block.type === "Affiliate Products" ? (
                         <div
-                          className="overflow-hidden transition-shadow"
-                          style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
+                          className="overflow-hidden transition-all"
+                          style={{ borderRadius: cardR, backgroundColor: cardBg, boxShadow: shadow, backdropFilter: cardBlur, border: bdr }}
                         >
                           {block.image && (
                             <div className="aspect-[16/9] bg-zinc-800 relative overflow-hidden">
@@ -1057,13 +1194,14 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                       /* ── Default / Fallback ── */
                       ) : (
                         <div
-                          className="p-3 flex items-center justify-between transition-shadow"
+                          className="p-3 flex items-center justify-between transition-all"
                           style={{
-                            borderRadius: btnRadius,
+                            borderRadius: cardR,
                             backgroundColor: a.buttonStyle === "fill" ? a.blockColor : cardBg,
                             color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor,
-                            border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}22`,
+                            border: a.cardBorderEnabled ? bdr : a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}22`,
                             boxShadow: shadow,
+                            backdropFilter: cardBlur,
                           }}
                         >
                           <span className="text-xs font-black uppercase tracking-wide">{block.title}</span>
