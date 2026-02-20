@@ -6,6 +6,7 @@ import {
   ShieldCheck,
   Upload,
   CheckCircle2,
+  AlertCircle,
   Clock,
   AlertTriangle,
   User,
@@ -145,6 +146,7 @@ export function VerificationView() {
   const [accountType, setAccountType] = useState("SAVINGS")
   const [showAccountNum, setShowAccountNum] = useState(false)
   const [addingBank, setAddingBank] = useState(false)
+  const [bankMessage, setBankMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   // Documents
   const [uploadingDoc, setUploadingDoc] = useState<string | null>(null)
@@ -276,8 +278,13 @@ export function VerificationView() {
 
   const handleAddBankAccount = async () => {
     console.log("[v0] handleAddBankAccount called", { activeIdentityId, accountNumber, routingNumber, accountName, accountType, country })
-    if (!activeIdentityId || !accountNumber || !routingNumber) {
-      console.log("[v0] Early return - missing required fields", { activeIdentityId: !!activeIdentityId, accountNumber: !!accountNumber, routingNumber: !!routingNumber })
+    setBankMessage(null)
+    if (!activeIdentityId) {
+      setBankMessage({ type: "error", text: "No identity found. Please complete Step 1 first." })
+      return
+    }
+    if (!accountNumber || !routingNumber) {
+      setBankMessage({ type: "error", text: "Account number and routing number are required." })
       return
     }
     setAddingBank(true)
@@ -301,15 +308,18 @@ export function VerificationView() {
       console.log("[v0] Bank account response:", res.status, data)
       if (!res.ok) {
         console.error("[v0] Bank account creation failed:", data)
+        setBankMessage({ type: "error", text: data?.error || "Failed to add bank account. Please check your details and try again." })
       } else {
         mutatePi()
         setAccountNumber("")
         setRoutingNumber("")
         setAccountName("")
         setBankName("")
+        setBankMessage({ type: "success", text: "Bank account added successfully!" })
       }
     } catch (err) {
       console.error("[v0] Bank account error:", err)
+      setBankMessage({ type: "error", text: "Network error. Please try again." })
     } finally {
       setAddingBank(false)
     }
@@ -710,10 +720,21 @@ export function VerificationView() {
                     <p className="text-[10px] text-amber-400/80">Your bank details are transmitted securely using encryption. We never store your full account number.</p>
                   </div>
 
+                  {bankMessage && (
+                    <div className={`flex items-center gap-2 p-3 rounded-xl text-xs font-medium ${
+                      bankMessage.type === "success"
+                        ? "bg-emerald-400/10 border border-emerald-400/20 text-emerald-400"
+                        : "bg-red-400/10 border border-red-400/20 text-red-400"
+                    }`}>
+                      {bankMessage.type === "success" ? <CheckCircle2 size={14} /> : <AlertCircle size={14} />}
+                      {bankMessage.text}
+                    </div>
+                  )}
+
                   <button
-                    onClick={handleAddBankAccount}
+                    onClick={() => { console.log("[v0] Button clicked, state:", { accountNumber, routingNumber, activeIdentityId, addingBank }); handleAddBankAccount() }}
                     disabled={addingBank || !accountNumber || !routingNumber}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-emerald-500 text-black rounded-xl text-xs font-black hover:bg-emerald-400 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-2.5 bg-emerald-500 text-black rounded-xl text-xs font-black hover:bg-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {addingBank && <Loader2 size={14} className="animate-spin" />}
                     {addingBank ? "Adding..." : "Add Bank Account"}
