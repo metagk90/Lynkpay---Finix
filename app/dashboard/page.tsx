@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Home,
   Link as LinkIcon,
@@ -52,6 +52,18 @@ export default function Page() {
   const [activeTab, setActiveTab] = useState("Home")
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [userName, setUserName] = useState<string>("")
+
+  useEffect(() => {
+    fetch("/api/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.user?.username) {
+          setUserName(data.user.username)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   const [userCountry] = useState<"US" | "CA">("US")
   const userCurrency = userCountry === "CA" ? "CAD" : "USD"
@@ -370,6 +382,11 @@ export default function Page() {
             </button>
             <div className="flex flex-col">
               <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic">{activeTab}</h1>
+              {userName && activeTab === "Home" && (
+                <p className="text-sm text-zinc-500 mt-0.5">
+                  Welcome back, <span className="text-emerald-500 font-medium">{userName}</span>
+                </p>
+              )}
             </div>
           </div>
 
@@ -378,14 +395,19 @@ export default function Page() {
               <Bell size={20} className="text-zinc-500" />
               <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-black" />
             </button>
-            <div className="hidden sm:flex bg-zinc-900 border border-zinc-800 rounded-2xl p-1 items-center gap-3">
+            <div className="hidden sm:flex bg-zinc-900 border border-zinc-800 rounded-2xl p-1.5 items-center gap-3 pr-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Habib"
+                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(userName || "User")}`}
                 className="w-9 h-9 rounded-xl"
                 alt="user avatar"
                 crossOrigin="anonymous"
               />
+              {userName && (
+                <span className="text-sm font-medium text-zinc-200 truncate max-w-[120px]">
+                  {userName}
+                </span>
+              )}
             </div>
           </div>
         </header>
