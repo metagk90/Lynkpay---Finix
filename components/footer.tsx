@@ -53,7 +53,8 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/30 bg-card/30">
+    <footer className="relative border-t border-border/30 bg-card/30">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent" />
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr]">
           <div className="flex flex-col gap-8 lg:flex-row lg:gap-16">
