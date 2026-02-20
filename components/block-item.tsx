@@ -97,12 +97,12 @@ export function BlockItem({ block, onToggle, onDelete, onEdit, onDuplicate, onMo
         ) : (
           <div
             className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors flex-shrink-0 ${
-              block.type === "Product"
+              block.type === "Product" || block.type === "Digital Product" || block.type === "Physical Product"
                 ? "bg-orange-500/10 border border-orange-500/20"
                 : "bg-emerald-500/10 border border-emerald-500/20"
             }`}
           >
-            {block.type === "Product" ? (
+            {block.type === "Product" || block.type === "Digital Product" || block.type === "Physical Product" ? (
               <Package size={22} className="text-orange-500" />
             ) : (
               <LinkIcon size={22} className="text-emerald-500" />

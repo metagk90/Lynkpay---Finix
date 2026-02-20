@@ -77,7 +77,7 @@ export default function Page() {
     {
       id: 2,
       title: "Follow Me",
-      type: "Social",
+      type: "Social Connect",
       active: true,
       socials: [
         { platform: "Instagram", url: "https://instagram.com" },
@@ -124,6 +124,13 @@ export default function Page() {
         description: "A premium digital product for your audience.",
         layout: "standard",
       },
+      "Digital Product": {
+        title: "New Digital Product",
+        price: "0.00",
+        image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400",
+        description: "A premium digital product for your audience.",
+        layout: "standard",
+      },
       Image: {
         title: "Image Block",
         image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
@@ -149,7 +156,7 @@ export default function Page() {
         description: "Check out my latest video!",
         layout: "standard",
       },
-      Social: {
+      "Social Connect": {
         title: "Follow Me",
         socials: [
           { platform: "Instagram", url: "" },
@@ -169,7 +176,7 @@ export default function Page() {
         price: "0.00",
         description: "30 min consultation",
       },
-      Course: {
+      "Course Video": {
         title: "My Course",
         price: "0.00",
         image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600",
@@ -185,11 +192,11 @@ export default function Page() {
         description: "If you enjoy my content, buy me a coffee!",
         price: "5.00",
       },
-      "Contact Form": {
+      "Email & Phone Number": {
         title: "Get in Touch",
         description: "Send me a message or inquiry.",
       },
-      Affiliate: {
+      "Affiliate Products": {
         title: "Recommended Product",
         url: "https://example.com/product",
         image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400",

@@ -705,9 +705,9 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                           className="p-3 flex items-center gap-3 transition-shadow"
                           style={{
                             borderRadius: btnRadius,
-                            backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent",
+                            backgroundColor: a.buttonStyle === "fill" ? a.blockColor : cardBg,
                             color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor,
-                            border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}33`,
+                            border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}22`,
                             boxShadow: shadow,
                           }}
                         >
@@ -732,21 +732,23 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                           className="overflow-hidden transition-shadow"
                           style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
                         >
-                          <div className="aspect-video bg-zinc-900 relative overflow-hidden flex items-center justify-center">
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                          <div className="aspect-video relative overflow-hidden flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${isDark ? "#18181b" : "#e4e4e7"}, ${isDark ? "#27272a" : "#d4d4d8"})` }}>
+                            {/* Decorative lines */}
+                            <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: `repeating-linear-gradient(45deg, ${a.blockColor} 0, ${a.blockColor} 1px, transparent 0, transparent 50%)`, backgroundSize: "12px 12px" }} />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                             <div
-                              className="w-10 h-10 rounded-full flex items-center justify-center z-10"
-                              style={{ backgroundColor: `${a.blockColor}dd` }}
+                              className="w-11 h-11 rounded-full flex items-center justify-center z-10 shadow-lg"
+                              style={{ backgroundColor: a.blockColor, boxShadow: `0 4px 20px ${a.blockColor}44` }}
                             >
                               <Play size={18} fill={a.btnTextColor} style={{ color: a.btnTextColor }} className="ml-0.5" />
                             </div>
                             {block.videoUrl && (
-                              <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[7px] font-black uppercase" style={{ backgroundColor: `${a.blockColor}22`, color: a.blockColor }}>
+                              <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[7px] font-black uppercase backdrop-blur-sm" style={{ backgroundColor: `${a.blockColor}22`, color: a.blockColor, border: `1px solid ${a.blockColor}30` }}>
                                 {block.videoUrl.includes("youtube") ? "YouTube" : block.videoUrl.includes("tiktok") ? "TikTok" : "Video"}
                               </div>
                             )}
                           </div>
-                          <div className="p-2.5">
+                          <div className="p-3">
                             <p className="font-black text-[10px] uppercase" style={{ color: a.textColor }}>{block.title}</p>
                             {block.description && (
                               <p className="text-[8px] mt-0.5 line-clamp-1" style={{ color: mutedText }}>{block.description}</p>
@@ -755,7 +757,7 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                         </div>
 
                       /* ── Social ── */
-                      ) : block.type === "Social" ? (
+                      ) : block.type === "Social" || block.type === "Social Connect" ? (
                         <div className="py-2">
                           {block.title && block.title !== "Follow Me" && (
                             <p className="text-[9px] font-bold text-center mb-2.5 uppercase tracking-wider" style={{ color: mutedText }}>{block.title}</p>
@@ -858,7 +860,7 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                         </div>
 
                       /* ── Course ── */
-                      ) : block.type === "Course" ? (
+                      ) : block.type === "Course" || block.type === "Course Video" ? (
                         <div
                           className="overflow-hidden transition-shadow"
                           style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
@@ -903,9 +905,9 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                         >
                           <div className="p-3">
                             <div className="flex gap-3">
-                              <div className="w-12 flex-shrink-0 flex flex-col items-center justify-center rounded-lg py-1.5" style={{ backgroundColor: `${a.blockColor}15` }}>
-                                <span className="text-[8px] font-black uppercase" style={{ color: a.blockColor }}>TBD</span>
-                                <span className="text-[14px] font-black leading-none mt-0.5" style={{ color: a.blockColor }}>--</span>
+                              <div className="w-12 flex-shrink-0 flex flex-col items-center justify-center rounded-xl py-2" style={{ backgroundColor: `${a.blockColor}15`, border: `1px solid ${a.blockColor}20` }}>
+                                <Calendar size={14} style={{ color: a.blockColor }} />
+                                <span className="text-[7px] font-black uppercase mt-1" style={{ color: a.blockColor }}>Event</span>
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="font-black text-[11px] uppercase truncate" style={{ color: a.textColor }}>{block.title}</p>
@@ -980,7 +982,7 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                         </div>
 
                       /* ── Contact Form ── */
-                      ) : block.type === "Contact Form" || block.type === "Contact" ? (
+                      ) : block.type === "Contact Form" || block.type === "Contact" || block.type === "Email & Phone Number" ? (
                         <div
                           className="overflow-hidden transition-shadow"
                           style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
@@ -994,9 +996,15 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                               <p className="text-[8px] leading-relaxed mb-2 line-clamp-2" style={{ color: mutedText }}>{block.description}</p>
                             )}
                             <div className="space-y-1.5 mb-2.5">
-                              <div className="h-6 rounded-md" style={{ backgroundColor: subtleBg }} />
-                              <div className="h-6 rounded-md" style={{ backgroundColor: subtleBg }} />
-                              <div className="h-10 rounded-md" style={{ backgroundColor: subtleBg }} />
+                              <div className="h-7 rounded-lg px-2.5 flex items-center" style={{ backgroundColor: subtleBg }}>
+                                <span className="text-[7px] font-bold uppercase tracking-wider" style={{ color: `${a.textColor}33` }}>Your name</span>
+                              </div>
+                              <div className="h-7 rounded-lg px-2.5 flex items-center" style={{ backgroundColor: subtleBg }}>
+                                <span className="text-[7px] font-bold uppercase tracking-wider" style={{ color: `${a.textColor}33` }}>Email address</span>
+                              </div>
+                              <div className="h-14 rounded-lg px-2.5 pt-2" style={{ backgroundColor: subtleBg }}>
+                                <span className="text-[7px] font-bold uppercase tracking-wider" style={{ color: `${a.textColor}33` }}>Your message</span>
+                              </div>
                             </div>
                             <button
                               className="w-full py-1.5 text-[9px] font-black uppercase tracking-wider transition-all"
@@ -1013,7 +1021,7 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                         </div>
 
                       /* ── Affiliate ── */
-                      ) : block.type === "Affiliate" ? (
+                      ) : block.type === "Affiliate" || block.type === "Affiliate Products" ? (
                         <div
                           className="overflow-hidden transition-shadow"
                           style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
@@ -1052,9 +1060,9 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                           className="p-3 flex items-center justify-between transition-shadow"
                           style={{
                             borderRadius: btnRadius,
-                            backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent",
+                            backgroundColor: a.buttonStyle === "fill" ? a.blockColor : cardBg,
                             color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor,
-                            border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}33`,
+                            border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}22`,
                             boxShadow: shadow,
                           }}
                         >

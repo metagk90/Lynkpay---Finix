@@ -21,6 +21,7 @@ export function BlockSettingsView({ block, onClose, onUpdate }: BlockSettingsVie
 
   switch (block.type) {
     case "Product":
+    case "Digital Product":
       return <ProductSettings {...props} />
     case "Image":
       return <ImageSettings {...props} />
@@ -31,16 +32,21 @@ export function BlockSettingsView({ block, onClose, onUpdate }: BlockSettingsVie
     case "Video":
       return <VideoSettings {...props} />
     case "Social":
+    case "Social Connect":
       return <SocialSettings {...props} />
     case "Blog":
       return <BlogSettings {...props} />
     case "Appointment":
     case "Course":
+    case "Course Video":
     case "Event":
     case "Supports":
     case "Affiliate":
+    case "Affiliate Products":
     case "Contact":
-    case "Physical":
+    case "Contact Form":
+    case "Email & Phone Number":
+    case "Physical Product":
       return <GenericMonetizationSettings {...props} />
     default:
       return <GenericMonetizationSettings {...props} />

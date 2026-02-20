@@ -11,11 +11,16 @@ interface Props { block: Block; onClose: () => void; onUpdate: (b: Block) => voi
 const typeConfig: Record<string, { title: string; fields: string[]; hasPrice?: boolean; hasDuration?: boolean; hasCapacity?: boolean }> = {
   Appointment: { title: "Edit Appointment", fields: ["duration", "location", "calendar"], hasPrice: true, hasDuration: true },
   Course: { title: "Edit Course Video", fields: ["modules", "preview"], hasPrice: true },
+  "Course Video": { title: "Edit Course Video", fields: ["modules", "preview"], hasPrice: true },
   Event: { title: "Edit Event", fields: ["date", "location", "capacity"], hasPrice: true, hasCapacity: true },
   Supports: { title: "Edit Supports", fields: ["goal", "message"], hasPrice: false },
   Affiliate: { title: "Edit Affiliate Products", fields: ["commission", "link"], hasPrice: true },
+  "Affiliate Products": { title: "Edit Affiliate Products", fields: ["commission", "link"], hasPrice: true },
   Contact: { title: "Edit Email & Phone Number", fields: ["fields", "redirect"] },
+  "Contact Form": { title: "Edit Contact Form", fields: ["fields", "redirect"] },
+  "Email & Phone Number": { title: "Edit Email & Phone Number", fields: ["fields", "redirect"] },
   Physical: { title: "Edit Physical Product", fields: ["shipping", "weight", "variants"], hasPrice: true },
+  "Physical Product": { title: "Edit Physical Product", fields: ["shipping", "weight", "variants"], hasPrice: true },
 }
 
 export function GenericMonetizationSettings({ block, onClose, onUpdate }: Props) {
@@ -142,7 +147,7 @@ export function GenericMonetizationSettings({ block, onClose, onUpdate }: Props)
                   </>
                 )}
 
-                {block.type === "Affiliate" && (
+                {(block.type === "Affiliate" || block.type === "Affiliate Products") && (
                   <>
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-zinc-400">Affiliate Link</label>
@@ -155,7 +160,7 @@ export function GenericMonetizationSettings({ block, onClose, onUpdate }: Props)
                   </>
                 )}
 
-                {block.type === "Physical" && (
+                {(block.type === "Physical" || block.type === "Physical Product") && (
                   <>
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-zinc-400">Weight (grams)</label>
@@ -168,7 +173,7 @@ export function GenericMonetizationSettings({ block, onClose, onUpdate }: Props)
                   </>
                 )}
 
-                {block.type === "Contact" && (
+                {(block.type === "Contact" || block.type === "Contact Form" || block.type === "Email & Phone Number") && (
                   <div className="space-y-3">
                     <label className="text-xs font-bold text-zinc-400">Collect Fields</label>
                     {["Email", "Phone", "Name", "Message"].map((field) => (
@@ -185,7 +190,7 @@ export function GenericMonetizationSettings({ block, onClose, onUpdate }: Props)
                   </div>
                 )}
 
-                {block.type === "Course" && (
+                {(block.type === "Course" || block.type === "Course Video") && (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h4 className="text-xs font-bold text-zinc-400">Modules</h4>
