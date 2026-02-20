@@ -53,13 +53,15 @@ export default function Page() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [userName, setUserName] = useState<string>("")
+  const [userEmail, setUserEmail] = useState<string>("")
 
   useEffect(() => {
     fetch("/api/me")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data?.user?.username) {
-          setUserName(data.user.username)
+        if (data?.user) {
+          if (data.user.username) setUserName(data.user.username)
+          if (data.user.email) setUserEmail(data.user.email)
         }
       })
       .catch(() => {})
@@ -365,7 +367,24 @@ export default function Page() {
           <SidebarItem icon={Zap} label="Automate Workflow" comingSoon />
         </nav>
 
-        <div className="mt-auto pt-6 border-t border-zinc-900/50">
+        <div className="mt-auto pt-6 border-t border-zinc-900/50 flex flex-col gap-4">
+          {userName && (
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-zinc-900/60 border border-zinc-800/40">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(userName)}`}
+                className="w-10 h-10 rounded-full border-2 border-emerald-500/30 shrink-0"
+                alt="user avatar"
+                crossOrigin="anonymous"
+              />
+              <div className="flex flex-col overflow-hidden">
+                <span className="text-sm font-bold text-white truncate">{userName}</span>
+                {userEmail && (
+                  <span className="text-[11px] text-zinc-500 truncate">{userEmail}</span>
+                )}
+              </div>
+            </div>
+          )}
           <SidebarItem icon={LogOut} label="Logout" />
         </div>
       </aside>
@@ -413,7 +432,7 @@ export default function Page() {
         </header>
 
         {activeTab === "Home" ? (
-          <HomeView chartData={chartData} currency={userCurrency} currencySymbol={currencySymbol} />
+          <HomeView chartData={chartData} currency={userCurrency} currencySymbol={currencySymbol} userName={userName} userEmail={userEmail} />
         ) : activeTab === "Appearance" ? (
           <AppearanceView blocks={blocks} appearance={appearance} onChange={handleAppearanceChange} />
         ) : activeTab === "Statistics" ? (
