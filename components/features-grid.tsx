@@ -181,13 +181,19 @@ export function FeaturesGrid() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIdx])
 
-  /* scroll active tab into view on mobile */
+  /* horizontally scroll tab bar so the active tab is centred (no page scroll) */
   useEffect(() => {
-    if (!tabBarRef.current) return
-    const activeBtn = tabBarRef.current.children[activeIdx] as HTMLElement | undefined
-    if (activeBtn) {
-      activeBtn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" })
-    }
+    const container = tabBarRef.current
+    if (!container) return
+    const activeBtn = container.children[activeIdx] as HTMLElement | undefined
+    if (!activeBtn) return
+
+    const scrollLeft =
+      activeBtn.offsetLeft -
+      container.offsetWidth / 2 +
+      activeBtn.offsetWidth / 2
+
+    container.scrollTo({ left: scrollLeft, behavior: "smooth" })
   }, [activeIdx])
 
   const handleTabClick = (idx: number) => {
