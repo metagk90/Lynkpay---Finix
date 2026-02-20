@@ -293,7 +293,7 @@ export default function Page() {
   }
 
   return (
-    <div className="flex min-h-screen bg-black font-sans text-zinc-100 selection:bg-emerald-500/30 overflow-x-hidden">
+    <div className="flex min-h-screen bg-black font-sans text-zinc-100 selection:bg-emerald-500/30">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div
@@ -359,7 +359,7 @@ export default function Page() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 lg:ml-72 min-h-screen relative p-6 md:p-10">
+      <main className="flex-1 lg:ml-72 h-screen overflow-y-auto relative p-6 md:p-10">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 relative z-10 gap-4">
           <div className="flex items-center gap-4">
             <button
