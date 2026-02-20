@@ -2,6 +2,7 @@ import { Header } from "@/components/header"
 import { Hero } from "@/components/hero"
 import { CreatorsStrip } from "@/components/creators-strip"
 import { FeaturesGrid } from "@/components/features-grid"
+import { SliderShowcase } from "@/components/slider-showcase"
 import { FeatureDetails } from "@/components/feature-details"
 import { Testimonials } from "@/components/testimonials"
 import { ProductBenefits } from "@/components/product-benefits"
@@ -20,6 +21,7 @@ export default function HomePage() {
         <Hero />
         <CreatorsStrip />
         <FeaturesGrid />
+        <SliderShowcase />
         <FeatureDetails />
         <Testimonials />
         <ProductBenefits />
