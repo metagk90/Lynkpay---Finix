@@ -145,3 +145,14 @@
 .block-hover-glow:hover { box-shadow: 0 0 20px var(--block-glow-color, rgba(16,185,129,0.25)) !important; }
 .block-hover-tilt { transition: transform 0.25s ease; perspective: 600px; }
 .block-hover-tilt:hover { transform: perspective(600px) rotateX(-2deg) rotateY(2deg) scale(1.01); }
+
+/* Hero ticker scroll animation */
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Font heading alias */
+.font-heading {
+  font-family: var(--font-plus-jakarta), var(--font-inter), sans-serif;
+}

@@ -12,6 +12,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ['var(--font-plus-jakarta)', 'sans-serif'],
+        heading: ['var(--font-plus-jakarta)', 'var(--font-inter)', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
