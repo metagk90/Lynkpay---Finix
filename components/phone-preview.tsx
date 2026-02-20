@@ -521,7 +521,7 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
             />
           ) : (
             <div
-              className={`relative flex flex-col h-full overflow-y-auto no-scrollbar pt-10 px-4 ${
+              className={`relative flex flex-col h-full overflow-y-auto no-scrollbar pt-10 ${a.contentWidth === "narrow" ? "px-6" : a.contentWidth === "wide" ? "px-2" : "px-4"} ${
                 a.bgEffect === "noise" ? "bg-noise" : ""
               } ${
                 a.bgOverlay === "vignette" ? "bg-vignette" : a.bgOverlay === "dark-fade" ? "bg-dark-fade" : a.bgOverlay === "light-fade" ? "bg-light-fade" : ""
@@ -701,7 +701,7 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
               )}
 
               {/* Blocks */}
-              <div className="space-y-3 pb-10">
+              <div className="pb-10 flex flex-col" style={{ gap: a.blockGap === "tight" ? "6px" : a.blockGap === "relaxed" ? "16px" : a.blockGap === "loose" ? "24px" : "12px" }}>
                 {blocks
                   .filter((b) => b.active)
                   .map((block) => {
@@ -718,9 +718,10 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                     const bdr = a.cardBorderEnabled ? `${a.cardBorderWidth ?? 1}px solid ${a.cardBorderColor}${Math.round((a.cardBorderOpacity ?? 20) * 2.55).toString(16).padStart(2, "0")}` : a.cardStyle === "bordered" ? `1.5px solid ${a.blockColor}30` : "none"
 
                     const hoverClass = a.blockHover === "lift" ? "block-hover-lift" : a.blockHover === "scale" ? "block-hover-scale" : a.blockHover === "glow" ? "block-hover-glow" : a.blockHover === "tilt" ? "block-hover-tilt" : ""
+                    const blockPad = a.blockPadding === "compact" ? "0px" : a.blockPadding === "spacious" ? "6px" : "0px"
 
                     return (
-                    <div key={block.id} className={`animate-in fade-in zoom-in duration-300 ${hoverClass}`} style={{ "--block-glow-color": `${a.blockColor}40` } as React.CSSProperties}>
+                    <div key={block.id} className={`animate-in fade-in zoom-in duration-300 ${hoverClass}`} style={{ "--block-glow-color": `${a.blockColor}40`, padding: blockPad } as React.CSSProperties}>
 
                       {/* ── Product / Digital Product / Physical Product ── */}
                       {(block.type === "Product" || block.type === "Digital Product") ? (

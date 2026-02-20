@@ -46,6 +46,10 @@ export interface AppearanceConfig {
   bannerOverlay: "none" | "gradient-fade" | "darken" | "blur"
   headerGradientColor1: string
   headerGradientColor2: string
+  // Spacing & Sizing
+  blockGap: "tight" | "normal" | "relaxed" | "loose"
+  contentWidth: "narrow" | "standard" | "wide"
+  blockPadding: "compact" | "normal" | "spacious"
 }
 
 export const DEFAULT_APPEARANCE: AppearanceConfig = {
@@ -96,4 +100,8 @@ export const DEFAULT_APPEARANCE: AppearanceConfig = {
   bannerOverlay: "none",
   headerGradientColor1: "#10b981",
   headerGradientColor2: "#06b6d4",
+  // Spacing & Sizing
+  blockGap: "normal",
+  contentWidth: "standard",
+  blockPadding: "normal",
 }

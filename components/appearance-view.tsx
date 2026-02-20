@@ -1181,6 +1181,103 @@ export function AppearanceView({ blocks, appearance, onChange }: AppearanceViewP
           </div>
         </section>
 
+        {/* Spacing & Sizing */}
+        <section className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-6 border border-zinc-800/50 space-y-6">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <h2 className="text-lg font-black text-white uppercase tracking-tight">Spacing & Sizing</h2>
+              <span className="bg-emerald-500/15 text-emerald-400 text-[9px] px-2 py-0.5 rounded font-black uppercase tracking-wider border border-emerald-500/25">NEW</span>
+            </div>
+            <p className="text-sm text-zinc-500">Control the whitespace, padding, and width of your page content.</p>
+          </div>
+
+          {/* Block Gap */}
+          <div>
+            <h3 className="text-sm font-bold text-zinc-300 mb-4">Block Spacing</h3>
+            <div className="flex gap-3">
+              {([
+                { key: "tight" as const, label: "Tight", gap: "2px" },
+                { key: "normal" as const, label: "Normal", gap: "6px" },
+                { key: "relaxed" as const, label: "Relaxed", gap: "10px" },
+                { key: "loose" as const, label: "Loose", gap: "16px" },
+              ]).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => onChange({ blockGap: opt.key })}
+                  className={`flex-1 flex flex-col items-center gap-2.5 py-3 rounded-xl border-2 transition-all ${
+                    a.blockGap === opt.key
+                      ? "border-emerald-500 bg-emerald-500/5"
+                      : "border-zinc-800 bg-zinc-900/60 hover:border-zinc-700"
+                  }`}
+                >
+                  {/* Mini preview of spacing */}
+                  <div className="flex flex-col items-center" style={{ gap: opt.gap }}>
+                    <div className="w-10 h-2 rounded-sm bg-zinc-600" />
+                    <div className="w-10 h-2 rounded-sm bg-zinc-600" />
+                    <div className="w-10 h-2 rounded-sm bg-zinc-600" />
+                  </div>
+                  <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">{opt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Block Padding */}
+          <div>
+            <h3 className="text-sm font-bold text-zinc-300 mb-4">Block Padding</h3>
+            <div className="flex gap-3">
+              {([
+                { key: "compact" as const, label: "Compact" },
+                { key: "normal" as const, label: "Normal" },
+                { key: "spacious" as const, label: "Spacious" },
+              ]).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => onChange({ blockPadding: opt.key })}
+                  className={`flex-1 py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
+                    a.blockPadding === opt.key
+                      ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                      : "border-zinc-700 bg-zinc-800/60 text-zinc-400 hover:border-zinc-600"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Content Width */}
+          <div>
+            <h3 className="text-sm font-bold text-zinc-300 mb-4">Content Width</h3>
+            <div className="flex gap-3">
+              {([
+                { key: "narrow" as const, label: "Narrow", desc: "Focused" },
+                { key: "standard" as const, label: "Standard", desc: "Default" },
+                { key: "wide" as const, label: "Wide", desc: "Full width" },
+              ]).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => onChange({ contentWidth: opt.key })}
+                  className={`flex-1 flex flex-col items-center gap-2 py-3 rounded-xl border-2 transition-all ${
+                    a.contentWidth === opt.key
+                      ? "border-emerald-500 bg-emerald-500/5"
+                      : "border-zinc-800 bg-zinc-900/60 hover:border-zinc-700"
+                  }`}
+                >
+                  {/* Mini width preview */}
+                  <div className="w-12 h-6 border border-zinc-600 rounded-sm flex items-center justify-center">
+                    <div
+                      className="h-3 bg-zinc-600 rounded-sm"
+                      style={{ width: opt.key === "narrow" ? "50%" : opt.key === "standard" ? "70%" : "90%" }}
+                    />
+                  </div>
+                  <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">{opt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <div className="pb-8" />
       </div>
 
