@@ -275,29 +275,41 @@ export function VerificationView() {
   }
 
   const handleAddBankAccount = async () => {
-    if (!activeIdentityId || !accountNumber || !routingNumber) return
+    console.log("[v0] handleAddBankAccount called", { activeIdentityId, accountNumber, routingNumber, accountName, accountType, country })
+    if (!activeIdentityId || !accountNumber || !routingNumber) {
+      console.log("[v0] Early return - missing required fields", { activeIdentityId: !!activeIdentityId, accountNumber: !!accountNumber, routingNumber: !!routingNumber })
+      return
+    }
     setAddingBank(true)
     try {
-      await fetch(`/api/finix/identities/${activeIdentityId}/payment-instruments`, {
+      const payload = {
+        type: "BANK_ACCOUNT",
+        name: accountName || `${firstName} ${lastName}`,
+        account_number: accountNumber,
+        bank_code: routingNumber,
+        account_type: accountType,
+        country,
+        currency: "USD",
+      }
+      console.log("[v0] Sending bank account payload:", payload)
+      const res = await fetch(`/api/finix/identities/${activeIdentityId}/payment-instruments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "BANK_ACCOUNT",
-          name: accountName || `${firstName} ${lastName}`,
-          account_number: accountNumber,
-          bank_code: routingNumber,
-          account_type: accountType,
-          country,
-          currency: "USD",
-        }),
+        body: JSON.stringify(payload),
       })
-      mutatePi()
-      setAccountNumber("")
-      setRoutingNumber("")
-      setAccountName("")
-      setBankName("")
-    } catch {
-      // silent
+      const data = await res.json()
+      console.log("[v0] Bank account response:", res.status, data)
+      if (!res.ok) {
+        console.error("[v0] Bank account creation failed:", data)
+      } else {
+        mutatePi()
+        setAccountNumber("")
+        setRoutingNumber("")
+        setAccountName("")
+        setBankName("")
+      }
+    } catch (err) {
+      console.error("[v0] Bank account error:", err)
     } finally {
       setAddingBank(false)
     }
