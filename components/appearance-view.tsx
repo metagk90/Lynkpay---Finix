@@ -1282,7 +1282,7 @@ export function AppearanceView({ blocks, appearance, onChange }: AppearanceViewP
       </div>
 
       {/* Right Side - Phone Preview */}
-      <div className="hidden xl:flex flex-col items-center">
+      <div className="hidden xl:flex flex-col items-center sticky top-6 self-start">
         <PhonePreview blocks={blocks} appearance={a} />
       </div>
     </div>

@@ -295,7 +295,7 @@ export function MyLynkView({ onShowPreview, blocks, onAddBlock, onToggleBlock, o
           )}
         </div>
       </div>
-      <div className="hidden xl:flex flex-col items-center">
+      <div className="hidden xl:flex flex-col items-center sticky top-6 self-start">
         <PhonePreview blocks={blocks} appearance={appearance} currency={currency} />
       </div>
     </div>
