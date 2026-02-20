@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { ExternalLink, Info, ImageIcon, Upload } from "lucide-react"
+import { useState, useRef } from "react"
+import { ExternalLink, Info, ImageIcon, Upload, X } from "lucide-react"
 import type { Block } from "../block-item"
 import { SettingsShell } from "../settings-shell"
 import { Toggle } from "../settings-toggle"
@@ -11,14 +11,24 @@ interface Props { block: Block; onClose: () => void; onUpdate: (b: Block) => voi
 export function LinkSettings({ block, onClose, onUpdate }: Props) {
   const [title, setTitle] = useState(block.title)
   const [url, setUrl] = useState(block.url || "https://")
-  const [showThumbnail, setShowThumbnail] = useState(false)
+  const [thumbnail, setThumbnail] = useState(block.image || "")
+  const [showThumbnail, setShowThumbnail] = useState(!!block.image || block.thumbnailStyle === "square")
   const [openNewTab, setOpenNewTab] = useState(true)
   const [lockLink, setLockLink] = useState(false)
   const [prioritize, setPrioritize] = useState(false)
   const [animation, setAnimation] = useState<"none" | "shake" | "pulse" | "bounce">("none")
+  const thumbInputRef = useRef<HTMLInputElement>(null)
+
+  const handleThumbSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const fileUrl = URL.createObjectURL(file)
+      setThumbnail(fileUrl)
+    }
+  }
 
   return (
-    <SettingsShell title="Edit Link" tabs={["Content"]} onClose={onClose} onSave={() => onUpdate({ ...block, title, url, thumbnailStyle: showThumbnail ? "square" : "none" })}>
+    <SettingsShell title="Edit Link" tabs={["Content"]} onClose={onClose} onSave={() => onUpdate({ ...block, title, url, image: showThumbnail ? thumbnail : null, thumbnailStyle: showThumbnail ? "square" : "none" })}>
       {() => (
         <div className="max-w-xl space-y-6">
           <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800/50 space-y-5">
@@ -46,10 +56,23 @@ export function LinkSettings({ block, onClose, onUpdate }: Props) {
                 <Toggle value={showThumbnail} onChange={setShowThumbnail} />
               </div>
               {showThumbnail && (
-                <button className="w-full py-10 border-2 border-dashed border-zinc-700 rounded-2xl flex flex-col items-center gap-2 hover:border-emerald-500/50 transition-colors">
-                  <Upload size={18} className="text-zinc-500" />
-                  <span className="text-xs text-zinc-500 font-bold">Upload thumbnail</span>
-                </button>
+                <>
+                  <input ref={thumbInputRef} type="file" accept="image/*" onChange={handleThumbSelect} className="hidden" />
+                  {thumbnail ? (
+                    <div className="relative w-full rounded-2xl overflow-hidden border border-zinc-700">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={thumbnail} alt="Thumbnail" className="w-full max-h-40 object-cover" crossOrigin="anonymous" />
+                      <button onClick={() => { setThumbnail(""); if (thumbInputRef.current) thumbInputRef.current.value = "" }} className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/70 border border-zinc-700 flex items-center justify-center hover:bg-red-500/80 transition-colors">
+                        <X size={12} className="text-white" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button onClick={() => thumbInputRef.current?.click()} className="w-full py-10 border-2 border-dashed border-zinc-700 rounded-2xl flex flex-col items-center gap-2 hover:border-emerald-500/50 transition-colors">
+                      <Upload size={18} className="text-zinc-500" />
+                      <span className="text-xs text-zinc-500 font-bold">Upload thumbnail</span>
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>

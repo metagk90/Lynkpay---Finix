@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import {
   ImageIcon,
   Upload,
@@ -41,9 +41,19 @@ type BlockLayout = "Default" | "Grid" | "Large Image" | "Compact"
 
 export function ProductSettings({ block, onClose, onUpdate }: ProductSettingsProps) {
   const [title, setTitle] = useState(block.title)
+  const [productImage, setProductImage] = useState(block.image || "")
+  const imageInputRef = useRef<HTMLInputElement>(null)
   const [description, setDescription] = useState(
     block.description || "Learn to become a professional VFX artist and make your tiktok videos go viral!"
   )
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const url = URL.createObjectURL(file)
+      setProductImage(url)
+    }
+  }
   const [platformTab, setPlatformTab] = useState<PlatformTab>("Other")
   const [platformUrl, setPlatformUrl] = useState("https://www.affribute.com/thank-you")
   const [price, setPrice] = useState("500000")
@@ -72,7 +82,7 @@ export function ProductSettings({ block, onClose, onUpdate }: ProductSettingsPro
     <SettingsShell
       title="Edit Digital Product"
       onClose={onClose}
-      onSave={() => onUpdate({ ...block, title, description, price })}
+      onSave={() => onUpdate({ ...block, title, description, price, image: productImage || block.image })}
     >
       {(activeTab) =>
         activeTab === "Content" ? (
@@ -85,23 +95,26 @@ export function ProductSettings({ block, onClose, onUpdate }: ProductSettingsPro
 
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-zinc-400">Image</label>
+                  <input ref={imageInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
                   <div className="flex items-center gap-3">
                     <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-zinc-700 bg-zinc-800">
-                      {block.image ? (
+                      {productImage ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={block.image} alt="product" className="w-full h-full object-cover" crossOrigin="anonymous" />
+                        <img src={productImage} alt="product" className="w-full h-full object-cover" crossOrigin="anonymous" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <ImageIcon size={20} className="text-zinc-600" />
                         </div>
                       )}
-                      <button className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                        <X size={8} className="text-white" />
-                      </button>
+                      {productImage && (
+                        <button onClick={() => { setProductImage(""); if (imageInputRef.current) imageInputRef.current.value = "" }} className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                          <X size={8} className="text-white" />
+                        </button>
+                      )}
                     </div>
-                    <button className="w-16 h-16 rounded-xl border-2 border-dashed border-zinc-700 flex flex-col items-center justify-center gap-1 hover:border-emerald-500/50 transition-colors">
+                    <button onClick={() => imageInputRef.current?.click()} className="w-16 h-16 rounded-xl border-2 border-dashed border-zinc-700 flex flex-col items-center justify-center gap-1 hover:border-emerald-500/50 transition-colors">
                       <ImageLucide size={16} className="text-zinc-500" />
-                      <span className="text-[8px] text-zinc-500 font-bold">Add Image</span>
+                      <span className="text-[8px] text-zinc-500 font-bold">{productImage ? "Replace" : "Add Image"}</span>
                     </button>
                   </div>
                 </div>
@@ -183,9 +196,11 @@ export function ProductSettings({ block, onClose, onUpdate }: ProductSettingsPro
                       <input type="text" value={platformUrl} onChange={(e) => setPlatformUrl(e.target.value)} className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-400 focus:outline-none focus:border-emerald-500/50 transition-colors" />
                     )}
                     {platformTab === "Upload" && (
-                      <button className="w-full py-8 border-2 border-dashed border-zinc-700 rounded-xl flex flex-col items-center gap-2 hover:border-emerald-500/50 transition-colors">
-                        <Upload size={20} className="text-zinc-500" /><span className="text-xs text-zinc-500 font-bold">Click to upload file</span>
-                      </button>
+                      <label className="w-full py-8 border-2 border-dashed border-zinc-700 rounded-xl flex flex-col items-center gap-2 hover:border-emerald-500/50 transition-colors cursor-pointer">
+                        <input type="file" accept="*/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) setPlatformUrl(e.target.files[0].name) }} />
+                        <Upload size={20} className="text-zinc-500" />
+                        <span className="text-xs text-zinc-500 font-bold">{platformUrl && platformTab === "Upload" ? platformUrl : "Click to upload file"}</span>
+                      </label>
                     )}
                     {(platformTab === "Dropbox" || platformTab === "G-drive") && (
                       <input type="text" placeholder={`Paste ${platformTab} link here...`} className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-400 focus:outline-none focus:border-emerald-500/50 transition-colors" />

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Bold, Italic, Underline, List, ListOrdered, AlignLeft, ChevronDown, Sparkles, Smile, Code2, Link2, Image as ImageLucide, Film, Upload, Info, ImageIcon, X } from "lucide-react"
 import type { Block } from "../block-item"
 import { SettingsShell } from "../settings-shell"
@@ -11,14 +11,24 @@ interface Props { block: Block; onClose: () => void; onUpdate: (b: Block) => voi
 export function BlogSettings({ block, onClose, onUpdate }: Props) {
   const [title, setTitle] = useState(block.title)
   const [content, setContent] = useState(block.content || "")
+  const [coverImage, setCoverImage] = useState(block.image || "")
   const [accessType, setAccessType] = useState<"free" | "paid" | "paywall">("free")
   const [price, setPrice] = useState(block.price || "0")
   const [currency, setCurrency] = useState("USD")
   const [enableComments, setEnableComments] = useState(true)
   const [showDate, setShowDate] = useState(true)
+  const coverInputRef = useRef<HTMLInputElement>(null)
+
+  const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const url = URL.createObjectURL(file)
+      setCoverImage(url)
+    }
+  }
 
   return (
-    <SettingsShell title="Edit Blog" onClose={onClose} onSave={() => onUpdate({ ...block, title, content, price: accessType !== "free" ? price : null, description: block.description })}>
+    <SettingsShell title="Edit Blog" onClose={onClose} onSave={() => onUpdate({ ...block, title, content, image: coverImage || block.image, price: accessType !== "free" ? price : null, description: block.description })}>
       {(activeTab) =>
         activeTab === "Content" ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -28,10 +38,24 @@ export function BlogSettings({ block, onClose, onUpdate }: Props) {
                 <h3 className="text-sm font-black text-white uppercase tracking-wider">Blog Post</h3>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-zinc-400">Cover Image</label>
-                  <button className="w-full py-12 border-2 border-dashed border-zinc-700 rounded-2xl flex flex-col items-center gap-2 hover:border-emerald-500/50 transition-colors">
-                    <Upload size={20} className="text-zinc-500" />
-                    <span className="text-xs text-zinc-500 font-bold">Upload cover image</span>
-                  </button>
+                  <input ref={coverInputRef} type="file" accept="image/*" onChange={handleCoverSelect} className="hidden" />
+                  {coverImage ? (
+                    <div className="relative w-full rounded-2xl overflow-hidden border border-zinc-700">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={coverImage} alt="Cover" className="w-full max-h-48 object-cover" crossOrigin="anonymous" />
+                      <button onClick={() => { setCoverImage(""); if (coverInputRef.current) coverInputRef.current.value = "" }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 border border-zinc-700 flex items-center justify-center hover:bg-red-500/80 transition-colors">
+                        <X size={14} className="text-white" />
+                      </button>
+                      <button onClick={() => coverInputRef.current?.click()} className="absolute bottom-2 right-2 px-3 py-1.5 rounded-lg bg-black/70 border border-zinc-700 text-[11px] font-bold text-zinc-300 hover:border-emerald-500/50 transition-colors">
+                        Replace
+                      </button>
+                    </div>
+                  ) : (
+                    <button onClick={() => coverInputRef.current?.click()} className="w-full py-12 border-2 border-dashed border-zinc-700 rounded-2xl flex flex-col items-center gap-2 hover:border-emerald-500/50 transition-colors">
+                      <Upload size={20} className="text-zinc-500" />
+                      <span className="text-xs text-zinc-500 font-bold">Upload cover image</span>
+                    </button>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-zinc-400">Title</label>

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Upload, ChevronDown, Info, Plus, ImageIcon } from "lucide-react"
+import { useState, useRef } from "react"
+import { Upload, ChevronDown, Info, Plus, ImageIcon, X } from "lucide-react"
 import type { Block } from "../block-item"
 import { SettingsShell } from "../settings-shell"
 import { Toggle } from "../settings-toggle"
@@ -22,8 +22,18 @@ export function GenericMonetizationSettings({ block, onClose, onUpdate }: Props)
   const config = typeConfig[block.type] || { title: `Edit ${block.type}`, fields: [], hasPrice: true }
 
   const [title, setTitle] = useState(block.title)
+  const [blockImage, setBlockImage] = useState(block.image || "")
+  const blockImageRef = useRef<HTMLInputElement>(null)
   const [description, setDescription] = useState(block.description || "")
   const [price, setPrice] = useState(block.price || "0")
+
+  const handleBlockImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const url = URL.createObjectURL(file)
+      setBlockImage(url)
+    }
+  }
   const [currency, setCurrency] = useState("USD")
   const [enableNotification, setEnableNotification] = useState(false)
   const [isActive, setIsActive] = useState(true)
@@ -40,7 +50,7 @@ export function GenericMonetizationSettings({ block, onClose, onUpdate }: Props)
   const [shippingNote, setShippingNote] = useState("")
 
   return (
-    <SettingsShell title={config.title} onClose={onClose} onSave={() => onUpdate({ ...block, title, description, price: config.hasPrice ? price : block.price, url: affiliateUrl || block.url })}>
+    <SettingsShell title={config.title} onClose={onClose} onSave={() => onUpdate({ ...block, title, description, image: blockImage || block.image, price: config.hasPrice ? price : block.price, url: affiliateUrl || block.url })}>
       {(activeTab) =>
         activeTab === "Content" ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -52,10 +62,24 @@ export function GenericMonetizationSettings({ block, onClose, onUpdate }: Props)
                 {/* Image */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-zinc-400">Image</label>
-                  <button className="w-full py-12 border-2 border-dashed border-zinc-700 rounded-2xl flex flex-col items-center gap-2 hover:border-emerald-500/50 transition-colors">
-                    <Upload size={20} className="text-zinc-500" />
-                    <span className="text-xs text-zinc-500 font-bold">Upload image</span>
-                  </button>
+                  <input ref={blockImageRef} type="file" accept="image/*" onChange={handleBlockImageSelect} className="hidden" />
+                  {blockImage ? (
+                    <div className="relative w-full rounded-2xl overflow-hidden border border-zinc-700">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={blockImage} alt="Block image" className="w-full max-h-48 object-cover" crossOrigin="anonymous" />
+                      <button onClick={() => { setBlockImage(""); if (blockImageRef.current) blockImageRef.current.value = "" }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 border border-zinc-700 flex items-center justify-center hover:bg-red-500/80 transition-colors">
+                        <X size={14} className="text-white" />
+                      </button>
+                      <button onClick={() => blockImageRef.current?.click()} className="absolute bottom-2 right-2 px-3 py-1.5 rounded-lg bg-black/70 border border-zinc-700 text-[11px] font-bold text-zinc-300 hover:border-emerald-500/50 transition-colors">
+                        Replace
+                      </button>
+                    </div>
+                  ) : (
+                    <button onClick={() => blockImageRef.current?.click()} className="w-full py-12 border-2 border-dashed border-zinc-700 rounded-2xl flex flex-col items-center gap-2 hover:border-emerald-500/50 transition-colors">
+                      <Upload size={20} className="text-zinc-500" />
+                      <span className="text-xs text-zinc-500 font-bold">Upload image</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* Title */}
