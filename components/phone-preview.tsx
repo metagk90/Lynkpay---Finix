@@ -627,7 +627,7 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                         </div>
 
                       /* ── Physical Product ── */
-                      ) : block.type === "Physical Product" ? (
+                      ) : block.type === "Physical" || block.type === "Physical Product" ? (
                         <div
                           className="overflow-hidden transition-shadow"
                           style={{ borderRadius: btnRadius, backgroundColor: cardBg, boxShadow: shadow }}
