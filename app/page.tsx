@@ -20,9 +20,9 @@ export default function HomePage() {
       <main>
         <Hero />
         <CreatorsStrip />
-        <FeaturesGrid />
         <SliderShowcase />
-        <FeatureDetails />
+        {/* <FeatureDetails /> */}
+        <FeaturesGrid />
         <Testimonials />
         <ProductBenefits />
         <TrustedBy />
