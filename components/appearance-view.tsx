@@ -75,10 +75,14 @@ export function AppearanceView({ blocks, appearance, onChange }: AppearanceViewP
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, field: "bannerImage" | "profileImage") => {
+    console.log("[v0] handleImageUpload triggered for:", field)
     const file = e.target.files?.[0]
+    console.log("[v0] file selected:", file?.name, file?.size)
     if (!file) return
     const url = URL.createObjectURL(file)
+    console.log("[v0] blob URL created:", url)
     onChange({ [field]: url })
+    console.log("[v0] onChange called with:", { [field]: url })
   }
 
   const applyTemplate = (template: typeof TEMPLATES[number]) => {
@@ -172,7 +176,7 @@ export function AppearanceView({ blocks, appearance, onChange }: AppearanceViewP
             <div>
               <h3 className="text-sm font-bold text-zinc-300 mb-3">Banner</h3>
               <div
-                onClick={() => bannerInputRef.current?.click()}
+                onClick={() => { console.log("[v0] Banner div clicked, ref:", bannerInputRef.current); bannerInputRef.current?.click() }}
                 className="relative aspect-[16/9] bg-zinc-800/60 rounded-2xl border-2 border-dashed border-zinc-700 flex flex-col items-center justify-center gap-2 hover:border-zinc-600 transition-colors cursor-pointer group overflow-hidden"
               >
                 {a.bannerImage ? (
