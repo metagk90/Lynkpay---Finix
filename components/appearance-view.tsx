@@ -76,10 +76,8 @@ export function AppearanceView({ blocks, appearance, onChange }: AppearanceViewP
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, field: "bannerImage" | "profileImage") => {
     const file = e.target.files?.[0]
-    console.log("[v0] handleImageUpload called", { field, file: file?.name, fileSize: file?.size })
     if (!file) return
     const url = URL.createObjectURL(file)
-    console.log("[v0] Created blob URL:", url)
     onChange({ [field]: url })
   }
 

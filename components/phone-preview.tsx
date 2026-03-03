@@ -566,9 +566,8 @@ export function PhonePreview({ isModal = false, onClose, blocks, appearance, cur
                 </div>
               </div>
 
-              {/* Banner (if layout is classic and has banner) */}
-              {console.log("[v0] Banner check:", { layout: a.layout, bannerImage: a.bannerImage })}
-              {a.layout === "classic" && a.bannerImage && (
+              {/* Banner (if bannerImage exists - show for all layouts except clean) */}
+              {a.bannerImage && a.layout !== "clean" && (
                 <div className="w-full aspect-[16/7] rounded-xl overflow-hidden mb-4 -mt-2 relative">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
