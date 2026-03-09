@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createIdentity, createPaymentInstrument, createTransfer } from "@/lib/finix"
+import clientPromise from "@/lib/mongodb"
+
+const DB = process.env.MONGODB_DB || "lynkpay"
 
 /**
  * Checkout API - White-label payment processing
@@ -80,6 +83,32 @@ export async function POST(req: NextRequest) {
         order_type: "lynkpay_checkout",
       },
     })
+
+    // Persist the order to MongoDB
+    try {
+      const mongo = await clientPromise
+      const db = mongo.db(DB)
+      await db.collection("orders").insertOne({
+        transactionId: transfer.id,
+        state: transfer.state,
+        amount: transfer.amount,
+        currency: transfer.currency || currency || "USD",
+        productTitle: productTitle || "Purchase",
+        productType: body.productType || "digital",
+        productImage: body.productImage || null,
+        customer: {
+          firstName: customer.firstName,
+          lastName: customer.lastName || "",
+          email: customer.email,
+          phone: customer.phone || "",
+        },
+        sellerUsername: body.sellerUsername || null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+    } catch {
+      // Order save failed but payment succeeded -- don't fail the response
+    }
 
     return NextResponse.json({
       success: true,

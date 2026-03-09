@@ -631,7 +631,7 @@ export default function Page() {
         ) : activeTab === "Statistics" ? (
           <StatisticsView currency={userCurrency} currencySymbol={currencySymbol} analytics={analytics ?? undefined} />
         ) : activeTab === "Orders" ? (
-          <OrdersView />
+          <OrdersView userName={userName} />
         ) : activeTab === "Transactions" ? (
           <TransactionsView currency={userCurrency} currencySymbol={currencySymbol} />
         ) : activeTab === "Disputes" ? (
