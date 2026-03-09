@@ -30,10 +30,14 @@ export async function GET(req: Request) {
     const client = await clientPromise
     const db = client.db(DB)
 
-    // Get cutoff date
+    // Get cutoff dates
     const cutoff = new Date()
     cutoff.setDate(cutoff.getDate() - days)
     const cutoffStr = cutoff.toISOString().slice(0, 10)
+
+    const prevCutoff = new Date()
+    prevCutoff.setDate(prevCutoff.getDate() - days * 2)
+    const prevCutoffStr = prevCutoff.toISOString().slice(0, 10)
 
     // Daily aggregates for charts
     const dailyStats = await db
@@ -42,7 +46,7 @@ export async function GET(req: Request) {
       .sort({ date: 1 })
       .toArray()
 
-    // Total counts
+    // Current period totals
     let totalViews = 0
     let totalClicks = 0
     let totalPurchases = 0
@@ -53,10 +57,6 @@ export async function GET(req: Request) {
     }
 
     // Previous period for comparison
-    const prevCutoff = new Date()
-    prevCutoff.setDate(prevCutoff.getDate() - days * 2)
-    const prevCutoffStr = prevCutoff.toISOString().slice(0, 10)
-
     const prevStats = await db
       .collection("analytics_daily")
       .find({ userId, date: { $gte: prevCutoffStr, $lt: cutoffStr } })
@@ -95,7 +95,39 @@ export async function GET(req: Request) {
         ip: { $ne: null },
       })
 
-    // Format daily data for charts
+    // Device breakdown
+    const devices = await db
+      .collection("analytics_devices")
+      .find({ userId })
+      .toArray()
+    const totalDeviceCount = devices.reduce((sum, d) => sum + (d.count || 0), 0)
+    const deviceBreakdown = devices.map((d) => ({
+      name: d.device,
+      value: totalDeviceCount > 0 ? Math.round(((d.count || 0) / totalDeviceCount) * 100) : 0,
+    }))
+
+    // Hourly distribution
+    const hourlyRaw = await db
+      .collection("analytics_hourly")
+      .find({ userId })
+      .sort({ hour: 1 })
+      .toArray()
+    // Fill in missing hours with 0
+    const hourlyMap: Record<string, number> = {}
+    for (let h = 0; h < 24; h += 2) {
+      hourlyMap[h.toString().padStart(2, "0")] = 0
+    }
+    for (const h of hourlyRaw) {
+      // bucket into even hours
+      const hourNum = parseInt(h.hour, 10)
+      const bucket = (Math.floor(hourNum / 2) * 2).toString().padStart(2, "0")
+      hourlyMap[bucket] = (hourlyMap[bucket] || 0) + (h.visitors || 0)
+    }
+    const hourlyDistribution = Object.entries(hourlyMap)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([hour, visitors]) => ({ hour, visitors }))
+
+    // Format daily data for charts (include purchases as revenue proxy)
     const chartData = dailyStats.map((d) => ({
       date: d.date,
       views: d.views || 0,
@@ -121,8 +153,10 @@ export async function GET(req: Request) {
         blockId: b.blockId,
         blockTitle: b.blockTitle,
         blockType: b.blockType,
-        clicks: b.clicks,
+        clicks: b.clicks || 0,
       })),
+      deviceBreakdown,
+      hourlyDistribution,
       period: { days, from: cutoffStr, to: new Date().toISOString().slice(0, 10) },
     })
   } catch {

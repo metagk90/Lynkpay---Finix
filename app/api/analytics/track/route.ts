@@ -3,10 +3,18 @@ import clientPromise from "@/lib/mongodb"
 
 const DB = process.env.MONGODB_DB || "lynkpay"
 
+function detectDevice(ua: string | null): string {
+  if (!ua) return "Desktop"
+  const lower = ua.toLowerCase()
+  if (/tablet|ipad|playbook|silk/.test(lower)) return "Tablet"
+  if (/mobile|iphone|ipod|android.*mobile|windows phone|blackberry/.test(lower)) return "Mobile"
+  return "Desktop"
+}
+
 /**
  * POST /api/analytics/track
- * Public endpoint -- records page_view and link_click events.
- * Body: { username, event, blockId?, blockTitle?, blockType?, referrer?, userAgent? }
+ * Public endpoint -- records page_view, link_click, and purchase events.
+ * Body: { username, event, blockId?, blockTitle?, blockType?, referrer? }
  */
 export async function POST(req: NextRequest) {
   try {
@@ -34,6 +42,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
+    const userAgent = req.headers.get("user-agent") ?? null
+    const device = detectDevice(userAgent)
+    const now = new Date()
+    const hour = now.getUTCHours().toString().padStart(2, "0")
+
     const doc = {
       userId: user._id.toString(),
       username: username.toLowerCase(),
@@ -42,15 +55,16 @@ export async function POST(req: NextRequest) {
       blockTitle: body.blockTitle ?? null,
       blockType: body.blockType ?? null,
       referrer: body.referrer ?? null,
-      userAgent: req.headers.get("user-agent") ?? null,
+      userAgent,
+      device,
       ip: req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
-      timestamp: new Date(),
+      timestamp: now,
     }
 
     await db.collection("analytics_events").insertOne(doc)
 
-    // Also update daily aggregates for fast reads
-    const today = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
+    // Update daily aggregates
+    const today = now.toISOString().slice(0, 10) // YYYY-MM-DD
     const incField = event === "page_view" ? "views" : event === "link_click" ? "clicks" : "purchases"
 
     await db.collection("analytics_daily").updateOne(
@@ -68,12 +82,26 @@ export async function POST(req: NextRequest) {
       { upsert: true }
     )
 
-    // If it's a link click, also track per-block stats
-    if (event === "link_click" && body.blockId) {
+    // Update device aggregates
+    await db.collection("analytics_devices").updateOne(
+      { userId: user._id.toString(), device },
+      { $inc: { count: 1 }, $setOnInsert: { userId: user._id.toString(), device } },
+      { upsert: true }
+    )
+
+    // Update hourly aggregates
+    await db.collection("analytics_hourly").updateOne(
+      { userId: user._id.toString(), hour },
+      { $inc: { visitors: 1 }, $setOnInsert: { userId: user._id.toString(), hour } },
+      { upsert: true }
+    )
+
+    // If it's a link click or purchase, track per-block stats
+    if ((event === "link_click" || event === "purchase") && body.blockId) {
       await db.collection("analytics_blocks").updateOne(
         { userId: user._id.toString(), blockId: body.blockId },
         {
-          $inc: { clicks: 1 },
+          $inc: { clicks: 1, ...(event === "purchase" ? { purchases: 1 } : {}) },
           $set: { blockTitle: body.blockTitle || "", blockType: body.blockType || "" },
           $setOnInsert: { userId: user._id.toString(), blockId: body.blockId },
         },

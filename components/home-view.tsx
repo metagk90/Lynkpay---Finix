@@ -43,6 +43,8 @@ interface AnalyticsData {
   changes: { views: string; clicks: string; purchases: string }
   chartData: { date: string; views: number; clicks: number; purchases: number }[]
   topBlocks: { blockId: number; blockTitle: string; blockType: string; clicks: number }[]
+  deviceBreakdown?: { name: string; value: number }[]
+  hourlyDistribution?: { hour: string; visitors: number }[]
 }
 
 interface HomeViewProps {
