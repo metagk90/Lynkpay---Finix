@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { Share2, ExternalLink, Smartphone, ChevronRight, Plus, Settings, Layers, Search } from "lucide-react"
+import { useState, useMemo, useCallback } from "react"
+import { Share2, ExternalLink, Smartphone, ChevronRight, Plus, Settings, Layers, Search, Check, Copy } from "lucide-react"
 import { BlockItem, type Block } from "./block-item"
 import { PhonePreview } from "./phone-preview"
 import { AddBlockModal } from "./add-block-modal"
@@ -34,13 +34,39 @@ interface MyLynkViewProps {
   onDuplicateBlock?: (id: number) => void
   appearance?: AppearanceConfig
   currency?: string
+  userName?: string
 }
 
-export function MyLynkView({ onShowPreview, blocks, onAddBlock, onToggleBlock, onDeleteBlock, onUpdateBlock, onReorderBlocks, onDuplicateBlock, appearance, currency = "USD" }: MyLynkViewProps) {
+export function MyLynkView({ onShowPreview, blocks, onAddBlock, onToggleBlock, onDeleteBlock, onUpdateBlock, onReorderBlocks, onDuplicateBlock, appearance, currency = "USD", userName = "" }: MyLynkViewProps) {
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingBlockId, setEditingBlockId] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [filterType, setFilterType] = useState<string>("All")
+  const [copied, setCopied] = useState(false)
+
+  const profileUrl = userName ? `${typeof window !== "undefined" ? window.location.origin : ""}/${userName}` : ""
+
+  const handleShare = useCallback(async () => {
+    if (!profileUrl) return
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${userName}'s LynkPay`, url: profileUrl })
+        return
+      } catch {
+        /* user cancelled or not supported */
+      }
+    }
+    await navigator.clipboard.writeText(profileUrl)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [profileUrl, userName])
+
+  const handleCopyUrl = useCallback(async () => {
+    if (!profileUrl) return
+    await navigator.clipboard.writeText(profileUrl)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [profileUrl])
 
   const blockTypes = useMemo(() => {
     const types = new Set(blocks.map((b) => b.type))
@@ -113,21 +139,39 @@ export function MyLynkView({ onShowPreview, blocks, onAddBlock, onToggleBlock, o
       <div className="xl:col-span-2 space-y-8">
         <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800/50 shadow-xl">
           <div className="flex flex-col md:flex-row items-center gap-4">
-            <div className="flex-1 w-full bg-black/60 border border-zinc-800 rounded-2xl px-5 py-3.5 flex items-center justify-between group">
+            <a
+              href={profileUrl || "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 w-full bg-black/60 border border-zinc-800 rounded-2xl px-5 py-3.5 flex items-center justify-between group hover:border-emerald-500/30 transition-colors cursor-pointer"
+              style={{ textDecoration: "none" }}
+            >
               <div className="flex items-center gap-2 truncate">
-                <span className="text-zinc-600 text-xs font-bold">{"My Lynkid:"}</span>
+                <span className="text-zinc-600 text-xs font-bold">{"My Lynk:"}</span>
                 <span className="text-emerald-400 font-black tracking-tight text-sm truncate">
-                  {"https://lynk.id/affribute"}
+                  {userName ? `lynkpay.co/${userName}` : "Set up your username"}
                 </span>
               </div>
               <ExternalLink size={16} className="text-zinc-600 group-hover:text-emerald-400 transition-colors" />
-            </div>
+            </a>
             <div className="flex gap-3 w-full md:w-auto">
-              <button className="flex-1 px-6 py-3 border border-emerald-500/50 text-emerald-500 rounded-2xl font-black text-xs uppercase transition-all hover:bg-emerald-500/10">
+              <button
+                onClick={handleShare}
+                disabled={!userName}
+                className="flex-1 px-6 py-3 border border-emerald-500/50 text-emerald-500 rounded-2xl font-black text-xs uppercase transition-all hover:bg-emerald-500/10 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
                 <Share2 size={16} className="inline mr-1" /> Share
               </button>
-              <button className="flex-1 px-6 py-3 bg-emerald-500 text-black rounded-2xl font-black text-xs uppercase shadow-lg shadow-emerald-500/20 active:scale-95 transition-all">
-                Customize URL
+              <button
+                onClick={handleCopyUrl}
+                disabled={!userName}
+                className="flex-1 px-6 py-3 bg-emerald-500 text-black rounded-2xl font-black text-xs uppercase shadow-lg shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {copied ? (
+                  <><Check size={16} strokeWidth={3} /> Copied!</>
+                ) : (
+                  <><Copy size={16} strokeWidth={3} /> Copy URL</>
+                )}
               </button>
             </div>
           </div>
