@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
 import {
   Home,
@@ -57,6 +57,9 @@ export default function Page() {
   const [userName, setUserName] = useState<string>("")
   const [userEmail, setUserEmail] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+  const hasLoadedFromDb = useRef(false)
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     fetch("/api/me")
@@ -66,10 +69,38 @@ export default function Page() {
           if (data.user.username) setUserName(data.user.username)
           if (data.user.email) setUserEmail(data.user.email)
         }
+        if (data?.dashboard) {
+          if (data.dashboard.blocks) setBlocks(data.dashboard.blocks)
+          if (data.dashboard.appearance) setAppearance((prev) => ({ ...prev, ...data.dashboard.appearance }))
+        }
+        hasLoadedFromDb.current = true
       })
       .catch(() => {})
       .finally(() => setIsLoading(false))
   }, [])
+
+  /** Debounced auto-save to MongoDB */
+  const saveDashboard = useCallback(
+    (blocksToSave: Block[], appearanceToSave: AppearanceConfig) => {
+      if (!hasLoadedFromDb.current) return
+      if (saveTimer.current) clearTimeout(saveTimer.current)
+      saveTimer.current = setTimeout(async () => {
+        setIsSaving(true)
+        try {
+          await fetch("/api/dashboard", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ blocks: blocksToSave, appearance: appearanceToSave }),
+          })
+        } catch {
+          /* silent fail -- data stays in local state */
+        } finally {
+          setIsSaving(false)
+        }
+      }, 1500)
+    },
+    []
+  )
 
   const handleLogout = useCallback(async () => {
     try {
@@ -87,7 +118,11 @@ export default function Page() {
   const [appearance, setAppearance] = useState<AppearanceConfig>(DEFAULT_APPEARANCE)
 
   const handleAppearanceChange = (update: Partial<AppearanceConfig>) => {
-    setAppearance((prev) => ({ ...prev, ...update }))
+    setAppearance((prev) => {
+      const next = { ...prev, ...update }
+      saveDashboard(blocks, next)
+      return next
+    })
   }
 
   const [blocks, setBlocks] = useState<Block[]>([
@@ -285,23 +320,32 @@ export default function Page() {
       thumbnailStyle: typeDefaults.thumbnailStyle ?? null,
       layout: typeDefaults.layout ?? null,
     }
-    setBlocks([newBlock, ...blocks])
+    const next = [newBlock, ...blocks]
+    setBlocks(next)
+    saveDashboard(next, appearance)
   }
 
   const handleToggleBlock = (id: number) => {
-    setBlocks(blocks.map((b) => (b.id === id ? { ...b, active: !b.active } : b)))
+    const next = blocks.map((b) => (b.id === id ? { ...b, active: !b.active } : b))
+    setBlocks(next)
+    saveDashboard(next, appearance)
   }
 
   const handleDeleteBlock = (id: number) => {
-    setBlocks(blocks.filter((b) => b.id !== id))
+    const next = blocks.filter((b) => b.id !== id)
+    setBlocks(next)
+    saveDashboard(next, appearance)
   }
 
   const handleUpdateBlock = (updated: Block) => {
-    setBlocks(blocks.map((b) => (b.id === updated.id ? updated : b)))
+    const next = blocks.map((b) => (b.id === updated.id ? updated : b))
+    setBlocks(next)
+    saveDashboard(next, appearance)
   }
 
   const handleReorderBlocks = (reordered: Block[]) => {
     setBlocks(reordered)
+    saveDashboard(reordered, appearance)
   }
 
   const handleDuplicateBlock = (id: number) => {
@@ -312,6 +356,7 @@ export default function Page() {
     const updated = [...blocks]
     updated.splice(idx + 1, 0, duplicate)
     setBlocks(updated)
+    saveDashboard(updated, appearance)
   }
 
   const toggleTab = (tab: string) => {
@@ -506,6 +551,12 @@ export default function Page() {
           </div>
 
           <div className="flex items-center gap-4 w-full md:w-auto justify-end">
+            {isSaving && (
+              <span className="text-[11px] font-medium text-zinc-500 flex items-center gap-1.5 animate-pulse">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                Saving...
+              </span>
+            )}
             <button className="p-3 bg-zinc-900 rounded-2xl border border-zinc-800 relative shadow-2xl">
               <Bell size={20} className="text-zinc-500" />
               <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-black" />
