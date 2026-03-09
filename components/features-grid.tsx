@@ -277,7 +277,7 @@ export function FeaturesGrid() {
           {/* scrollable tabs */}
           <div
             ref={tabBarRef}
-            className="no-scrollbar flex gap-1.5 overflow-x-auto pb-2 sm:justify-center"
+            className="relative no-scrollbar flex gap-1.5 overflow-x-auto pb-2 sm:justify-center"
           >
             {features.map((f, i) => {
               const isActive = i === activeIdx

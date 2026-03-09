@@ -150,7 +150,7 @@ export function FeatureDetails() {
           <button onClick={goToPrev} className="hidden shrink-0 items-center justify-center rounded-full border border-border bg-card p-2 text-muted-foreground transition-colors hover:text-foreground sm:flex" aria-label="Previous feature">
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <div ref={tabsRailRef} className="no-scrollbar flex snap-x snap-mandatory gap-1.5 overflow-x-auto scroll-smooth" role="tablist">
+          <div ref={tabsRailRef} className="relative no-scrollbar flex snap-x snap-mandatory gap-1.5 overflow-x-auto scroll-smooth" role="tablist">
             {features.map((feature, index) => (
               <button
                 key={feature.label}
