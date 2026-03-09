@@ -9,19 +9,19 @@ const footerLinks = {
   product: {
     title: "Product",
     links: [
-      { label: "Features", href: "#features" },
-      { label: "Pricing", href: "#pricing" },
-      { label: "Use Cases", href: "#use-cases" },
-      { label: "Integrations", href: "#integrations" },
+      { label: "Features", href: "/service" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "FAQ", href: "/faq" },
+      { label: "Blog", href: "/blogs" },
     ],
   },
   company: {
     title: "Company",
     links: [
-      { label: "About Us", href: "#about" },
-      { label: "Contact Us", href: "#contact" },
-      { label: "Careers", href: "#careers" },
-      { label: "Blog", href: "/blogs" },
+      { label: "About Us", href: "/service" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "Sign Up", href: "/signup" },
+      { label: "Login", href: "/login" },
     ],
   },
   legal: {
@@ -30,16 +30,16 @@ const footerLinks = {
       { label: "Terms & Conditions", href: "/terms" },
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms of Use", href: "/terms-of-use" },
-      { label: "Sitemap", href: "#sitemap" },
+      { label: "FAQ", href: "/faq" },
     ],
   },
   resources: {
     title: "Resources",
     links: [
-      { label: "Help Center", href: "#help" },
-      { label: "Creator Guide", href: "#guide" },
-      { label: "API Docs", href: "#api" },
-      { label: "Status", href: "#status" },
+      { label: "Service", href: "/service" },
+      { label: "Blog", href: "/blogs" },
+      { label: "FAQ", href: "/faq" },
+      { label: "Pricing", href: "/pricing" },
     ],
   },
 }

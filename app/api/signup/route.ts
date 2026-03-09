@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
-import { hashPassword } from "@/lib/auth"
+import { hashPassword, createSessionToken, SESSION_COOKIE_NAME, SESSION_DURATION_SECONDS } from "@/lib/auth"
 import { upsertLynkPageOnSignup } from "@/lib/lynk-data"
 import clientPromise from "@/lib/mongodb"
 
@@ -78,13 +78,30 @@ export async function POST(request: Request) {
       // Keep signup successful even if secondary page bootstrap fails.
     }
 
-    return NextResponse.json(
+    // Auto-login: set session cookie so user goes straight to dashboard
+    const token = createSessionToken({
+      sub: result.insertedId.toString(),
+      email: input.email,
+      username: input.username,
+    })
+
+    const response = NextResponse.json(
       {
         message: "Account created successfully",
         userId: result.insertedId.toString(),
       },
       { status: 201 },
     )
+    response.cookies.set({
+      name: SESSION_COOKIE_NAME,
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: SESSION_DURATION_SECONDS,
+    })
+    return response
   } catch {
     return NextResponse.json({ message: "Failed to create account" }, { status: 500 })
   }

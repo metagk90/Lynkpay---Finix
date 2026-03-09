@@ -3,7 +3,7 @@ import { cookies } from "next/headers"
 import clientPromise from "@/lib/mongodb"
 import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth"
 
-const DB = process.env.MONGODB_DB || "LYNKPAYCO"
+const DB = process.env.MONGODB_DB || "lynkpay"
 
 export async function GET() {
   try {
