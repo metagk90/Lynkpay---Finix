@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40" fill="none">
+  <defs>
+    <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  <!-- Icon: Link chain stylized -->
+  <rect x="2" y="8" width="24" height="24" rx="6" fill="url(#logo-grad)"/>
+  <path d="M10 20h4m-2-2v4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <path d="M18 16l-4 4m0-3v3h3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Wordmark -->
+  <text x="34" y="26" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="18" fill="currentColor" letter-spacing="-0.5">
+    <tspan fill="currentColor">LYNK</tspan><tspan fill="#10B981">PAY</tspan>
+  </text>
+</svg>

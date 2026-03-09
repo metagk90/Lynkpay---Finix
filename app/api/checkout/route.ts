@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createIdentity, createPaymentInstrument, createTransfer } from "@/lib/finix"
+import clientPromise from "@/lib/mongodb"
+
+const DB = process.env.MONGODB_DB || "lynkpay"
 
 /**
  * Checkout API - White-label payment processing
@@ -31,8 +34,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Payment processing not configured. FINIX_MERCHANT_ID is missing." }, { status: 500 })
     }
 
-    console.log("[v0] Checkout - Step 1: Creating buyer identity...")
-
     // Step 1: Create buyer identity
     // Finix requires entity fields for identity creation
     const identity = await createIdentity({
@@ -44,9 +45,6 @@ export async function POST(req: NextRequest) {
         phone: customer.phone || "1234567890",
       },
     })
-
-    console.log("[v0] Checkout - Identity created:", identity.id)
-    console.log("[v0] Checkout - Step 2: Creating payment instrument...")
 
     // Step 2: Create payment instrument (card)
     // Finix requires: identity, type, number, expiration_month, expiration_year, security_code, address
@@ -73,9 +71,6 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    console.log("[v0] Checkout - Payment instrument created:", paymentInstrument.id)
-    console.log("[v0] Checkout - Step 3: Creating transfer...")
-
     // Step 3: Create transfer (charge)
     // amount must be in cents (integer), currency uppercase
     const transfer = await createTransfer({
@@ -89,7 +84,31 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    console.log("[v0] Checkout - Transfer created:", transfer.id, "state:", transfer.state)
+    // Persist the order to MongoDB
+    try {
+      const mongo = await clientPromise
+      const db = mongo.db(DB)
+      await db.collection("orders").insertOne({
+        transactionId: transfer.id,
+        state: transfer.state,
+        amount: transfer.amount,
+        currency: transfer.currency || currency || "USD",
+        productTitle: productTitle || "Purchase",
+        productType: body.productType || "digital",
+        productImage: body.productImage || null,
+        customer: {
+          firstName: customer.firstName,
+          lastName: customer.lastName || "",
+          email: customer.email,
+          phone: customer.phone || "",
+        },
+        sellerUsername: body.sellerUsername || null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+    } catch {
+      // Order save failed but payment succeeded -- don't fail the response
+    }
 
     return NextResponse.json({
       success: true,
@@ -101,7 +120,6 @@ export async function POST(req: NextRequest) {
     })
   } catch (error: unknown) {
     const rawMessage = error instanceof Error ? error.message : "Checkout failed"
-    console.error("[v0] Checkout Error (raw):", rawMessage)
 
     // Try to extract the Finix error body for a user-friendly message
     let userMessage = "Payment could not be processed. Please try again."
@@ -123,8 +141,7 @@ export async function POST(req: NextRequest) {
     } catch {
       // parsing failed, use default
     }
-    
-    console.error("[v0] Checkout Error (user-facing):", userMessage)
+
     return NextResponse.json({ error: userMessage }, { status: 500 })
   }
 }

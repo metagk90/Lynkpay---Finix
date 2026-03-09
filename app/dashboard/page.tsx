@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
+import { useRouter } from "next/navigation"
 import {
   Home,
   Link as LinkIcon,
@@ -35,23 +36,116 @@ import { DisputesView } from "@/components/payments/disputes-view"
 import { ReportsView } from "@/components/payments/reports-view"
 import { VerificationView } from "@/components/payments/verification-view"
 import { PhonePreview } from "@/components/phone-preview"
+import { SettingsView } from "@/components/settings-view"
 import type { Block } from "@/components/block-item"
 import type { AppearanceConfig } from "@/lib/appearance-types"
 import { DEFAULT_APPEARANCE } from "@/lib/appearance-types"
 
-const chartData = [
-  { name: "08 Feb", views: 8, clicks: 3 },
-  { name: "09 Feb", views: 15, clicks: 8 },
-  { name: "10 Feb", views: 30, clicks: 18 },
-  { name: "11 Feb", views: 85, clicks: 45 },
-  { name: "12 Feb", views: 32, clicks: 19 },
-  { name: "13 Feb", views: 18, clicks: 10 },
+const fallbackChartData = [
+  { name: "08 Feb", views: 0, clicks: 0 },
+  { name: "09 Feb", views: 0, clicks: 0 },
+  { name: "10 Feb", views: 0, clicks: 0 },
+  { name: "11 Feb", views: 0, clicks: 0 },
+  { name: "12 Feb", views: 0, clicks: 0 },
+  { name: "13 Feb", views: 0, clicks: 0 },
 ]
 
+interface AnalyticsData {
+  totals: { views: number; clicks: number; purchases: number; uniqueVisitors: number; clickRate: string }
+  changes: { views: string; clicks: string; purchases: string }
+  chartData: { date: string; views: number; clicks: number; purchases: number }[]
+  topBlocks: { blockId: number; blockTitle: string; blockType: string; clicks: number }[]
+  deviceBreakdown?: { name: string; value: number }[]
+  hourlyDistribution?: { hour: string; visitors: number }[]
+}
+
 export default function Page() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState("Home")
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [userName, setUserName] = useState<string>("")
+  const [userEmail, setUserEmail] = useState<string>("")
+  const [userProfile, setUserProfile] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    phone: "",
+    country: "",
+  })
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
+  const hasLoadedFromDb = useRef(false)
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    // Fetch user data + dashboard
+    fetch("/api/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.user) {
+          if (data.user.username) setUserName(data.user.username)
+          if (data.user.email) setUserEmail(data.user.email)
+          setUserProfile({
+            firstName: data.user.firstName || "",
+            lastName: data.user.lastName || "",
+            username: data.user.username || "",
+            email: data.user.email || "",
+            phone: data.user.phone || "",
+            country: data.user.country || "",
+          })
+        }
+        if (data?.dashboard) {
+          if (data.dashboard.blocks) setBlocks(data.dashboard.blocks)
+          if (data.dashboard.appearance) setAppearance((prev) => ({ ...prev, ...data.dashboard.appearance }))
+        }
+        hasLoadedFromDb.current = true
+      })
+      .catch(() => {})
+      .finally(() => setIsLoading(false))
+
+    // Fetch analytics in parallel
+    fetch("/api/analytics?days=30")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) setAnalytics(data)
+      })
+      .catch(() => {})
+  }, [])
+
+  /** Debounced auto-save to MongoDB */
+  const saveDashboard = useCallback(
+    (blocksToSave: Block[], appearanceToSave: AppearanceConfig) => {
+      if (!hasLoadedFromDb.current) return
+      if (saveTimer.current) clearTimeout(saveTimer.current)
+      saveTimer.current = setTimeout(async () => {
+        setIsSaving(true)
+        try {
+          await fetch("/api/dashboard", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ blocks: blocksToSave, appearance: appearanceToSave }),
+          })
+        } catch {
+          /* silent fail -- data stays in local state */
+        } finally {
+          setIsSaving(false)
+        }
+      }, 1500)
+    },
+    []
+  )
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await fetch("/api/logout", { method: "POST" })
+    } catch {
+      /* cookie will still be cleared by maxAge:0 */
+    }
+    router.push("/login")
+  }, [router])
 
   const [userCountry] = useState<"US" | "CA">("US")
   const userCurrency = userCountry === "CA" ? "CAD" : "USD"
@@ -60,7 +154,11 @@ export default function Page() {
   const [appearance, setAppearance] = useState<AppearanceConfig>(DEFAULT_APPEARANCE)
 
   const handleAppearanceChange = (update: Partial<AppearanceConfig>) => {
-    setAppearance((prev) => ({ ...prev, ...update }))
+    setAppearance((prev) => {
+      const next = { ...prev, ...update }
+      saveDashboard(blocks, next)
+      return next
+    })
   }
 
   const [blocks, setBlocks] = useState<Block[]>([
@@ -258,23 +356,32 @@ export default function Page() {
       thumbnailStyle: typeDefaults.thumbnailStyle ?? null,
       layout: typeDefaults.layout ?? null,
     }
-    setBlocks([newBlock, ...blocks])
+    const next = [newBlock, ...blocks]
+    setBlocks(next)
+    saveDashboard(next, appearance)
   }
 
   const handleToggleBlock = (id: number) => {
-    setBlocks(blocks.map((b) => (b.id === id ? { ...b, active: !b.active } : b)))
+    const next = blocks.map((b) => (b.id === id ? { ...b, active: !b.active } : b))
+    setBlocks(next)
+    saveDashboard(next, appearance)
   }
 
   const handleDeleteBlock = (id: number) => {
-    setBlocks(blocks.filter((b) => b.id !== id))
+    const next = blocks.filter((b) => b.id !== id)
+    setBlocks(next)
+    saveDashboard(next, appearance)
   }
 
   const handleUpdateBlock = (updated: Block) => {
-    setBlocks(blocks.map((b) => (b.id === updated.id ? updated : b)))
+    const next = blocks.map((b) => (b.id === updated.id ? updated : b))
+    setBlocks(next)
+    saveDashboard(next, appearance)
   }
 
   const handleReorderBlocks = (reordered: Block[]) => {
     setBlocks(reordered)
+    saveDashboard(reordered, appearance)
   }
 
   const handleDuplicateBlock = (id: number) => {
@@ -285,11 +392,95 @@ export default function Page() {
     const updated = [...blocks]
     updated.splice(idx + 1, 0, duplicate)
     setBlocks(updated)
+    saveDashboard(updated, appearance)
   }
 
   const toggleTab = (tab: string) => {
     setActiveTab(tab)
     setIsSidebarOpen(false)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-black font-sans text-zinc-100">
+        {/* Sidebar skeleton */}
+        <aside className="hidden lg:flex fixed inset-y-0 left-0 w-72 bg-[#050505] border-r border-zinc-900/50 p-6 flex-col gap-10">
+          <div className="flex items-center gap-1 px-4 py-2">
+            <div className="h-8 w-32 rounded-lg bg-zinc-900 animate-pulse" />
+          </div>
+          <div className="flex flex-col gap-3 mt-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+                <div className="h-5 w-5 rounded-md bg-zinc-900 animate-pulse" />
+                <div className="h-4 rounded-md bg-zinc-900 animate-pulse" style={{ width: `${60 + Math.random() * 40}%` }} />
+              </div>
+            ))}
+          </div>
+          <div className="mt-auto pt-6 border-t border-zinc-900/50">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-zinc-900/60 border border-zinc-800/40">
+              <div className="w-10 h-10 rounded-full bg-zinc-800 animate-pulse shrink-0" />
+              <div className="flex flex-col gap-1.5 flex-1">
+                <div className="h-3.5 w-24 rounded bg-zinc-800 animate-pulse" />
+                <div className="h-2.5 w-32 rounded bg-zinc-800/60 animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main content skeleton */}
+        <main className="flex-1 lg:ml-72 h-screen p-6 md:p-10">
+          <header className="flex justify-between items-center mb-10">
+            <div className="flex flex-col gap-2">
+              <div className="h-8 w-36 rounded-lg bg-zinc-900 animate-pulse" />
+              <div className="h-4 w-48 rounded bg-zinc-900/60 animate-pulse" />
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-11 h-11 rounded-2xl bg-zinc-900 animate-pulse" />
+              <div className="hidden sm:flex items-center gap-3 bg-zinc-900 rounded-2xl p-1.5 pr-4">
+                <div className="w-9 h-9 rounded-xl bg-zinc-800 animate-pulse" />
+                <div className="h-4 w-20 rounded bg-zinc-800 animate-pulse" />
+              </div>
+            </div>
+          </header>
+
+          {/* Stats row skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="rounded-2xl border border-zinc-900/50 bg-zinc-950 p-5">
+                <div className="h-3 w-16 rounded bg-zinc-900 animate-pulse mb-3" />
+                <div className="h-7 w-24 rounded bg-zinc-900 animate-pulse mb-2" />
+                <div className="h-3 w-20 rounded bg-zinc-900/60 animate-pulse" />
+              </div>
+            ))}
+          </div>
+
+          {/* Chart skeleton */}
+          <div className="rounded-2xl border border-zinc-900/50 bg-zinc-950 p-6 mb-8">
+            <div className="h-5 w-32 rounded bg-zinc-900 animate-pulse mb-6" />
+            <div className="flex items-end gap-3 h-40">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-1 rounded-t-md bg-zinc-900 animate-pulse"
+                  style={{ height: `${30 + Math.random() * 70}%` }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Profile card skeleton */}
+          <div className="rounded-2xl border border-zinc-900/50 bg-zinc-950 p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-xl bg-zinc-900 animate-pulse" />
+              <div className="flex flex-col gap-2">
+                <div className="h-5 w-32 rounded bg-zinc-900 animate-pulse" />
+                <div className="h-3 w-48 rounded bg-zinc-900/60 animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   return (
@@ -342,7 +533,7 @@ export default function Page() {
             ]}
           />
           <SidebarItem icon={GraduationCap} label="Tutorials" />
-          <SidebarItem icon={Settings} label="Settings" />
+          <SidebarItem icon={Settings} label="Settings" active={activeTab === "Settings"} onClick={() => toggleTab("Settings")} />
 
           <p className="px-4 text-[10px] font-black text-zinc-700 uppercase tracking-widest mt-8 mb-4">
             Marketing Tools
@@ -353,8 +544,25 @@ export default function Page() {
           <SidebarItem icon={Zap} label="Automate Workflow" comingSoon />
         </nav>
 
-        <div className="mt-auto pt-6 border-t border-zinc-900/50">
-          <SidebarItem icon={LogOut} label="Logout" />
+        <div className="mt-auto pt-6 border-t border-zinc-900/50 flex flex-col gap-4">
+          {userName && (
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-zinc-900/60 border border-zinc-800/40">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(userName)}`}
+                className="w-10 h-10 rounded-full border-2 border-emerald-500/30 shrink-0"
+                alt="user avatar"
+                crossOrigin="anonymous"
+              />
+              <div className="flex flex-col overflow-hidden">
+                <span className="text-sm font-bold text-white truncate">{userName}</span>
+                {userEmail && (
+                  <span className="text-[11px] text-zinc-500 truncate">{userEmail}</span>
+                )}
+              </div>
+            </div>
+          )}
+          <SidebarItem icon={LogOut} label="Logout" onClick={handleLogout} />
         </div>
       </aside>
 
@@ -370,34 +578,60 @@ export default function Page() {
             </button>
             <div className="flex flex-col">
               <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic">{activeTab}</h1>
+              {userName && activeTab === "Home" && (
+                <p className="text-sm text-zinc-500 mt-0.5">
+                  Welcome back, <span className="text-emerald-500 font-medium">{userName}</span>
+                </p>
+              )}
             </div>
           </div>
 
           <div className="flex items-center gap-4 w-full md:w-auto justify-end">
+            {isSaving && (
+              <span className="text-[11px] font-medium text-zinc-500 flex items-center gap-1.5 animate-pulse">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                Saving...
+              </span>
+            )}
             <button className="p-3 bg-zinc-900 rounded-2xl border border-zinc-800 relative shadow-2xl">
               <Bell size={20} className="text-zinc-500" />
               <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-black" />
             </button>
-            <div className="hidden sm:flex bg-zinc-900 border border-zinc-800 rounded-2xl p-1 items-center gap-3">
+            <div className="hidden sm:flex bg-zinc-900 border border-zinc-800 rounded-2xl p-1.5 items-center gap-3 pr-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Habib"
+                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(userName || "User")}`}
                 className="w-9 h-9 rounded-xl"
                 alt="user avatar"
                 crossOrigin="anonymous"
               />
+              {userName && (
+                <span className="text-sm font-medium text-zinc-200 truncate max-w-[120px]">
+                  {userName}
+                </span>
+              )}
             </div>
           </div>
         </header>
 
         {activeTab === "Home" ? (
-          <HomeView chartData={chartData} currency={userCurrency} currencySymbol={currencySymbol} />
+          <HomeView
+            chartData={analytics?.chartData?.length
+              ? analytics.chartData.map((d) => ({ name: d.date.slice(5).replace("-", " "), views: d.views, clicks: d.clicks }))
+              : fallbackChartData
+            }
+            currency={userCurrency}
+            currencySymbol={currencySymbol}
+            userName={userName}
+            userEmail={userEmail}
+            analytics={analytics ?? undefined}
+          />
         ) : activeTab === "Appearance" ? (
           <AppearanceView blocks={blocks} appearance={appearance} onChange={handleAppearanceChange} />
         ) : activeTab === "Statistics" ? (
-          <StatisticsView currency={userCurrency} currencySymbol={currencySymbol} />
+          <StatisticsView currency={userCurrency} currencySymbol={currencySymbol} analytics={analytics ?? undefined} />
         ) : activeTab === "Orders" ? (
-          <OrdersView />
+          <OrdersView userName={userName} />
         ) : activeTab === "Transactions" ? (
           <TransactionsView currency={userCurrency} currencySymbol={currencySymbol} />
         ) : activeTab === "Disputes" ? (
@@ -406,6 +640,15 @@ export default function Page() {
           <ReportsView currency={userCurrency} currencySymbol={currencySymbol} />
         ) : activeTab === "Verification" ? (
           <VerificationView />
+        ) : activeTab === "Settings" ? (
+          <SettingsView
+            user={userProfile}
+            onProfileUpdated={({ username, email }) => {
+              setUserName(username)
+              setUserEmail(email)
+              setUserProfile((p) => ({ ...p, username, email }))
+            }}
+          />
         ) : (
           <MyLynkView
             onShowPreview={() => setIsPreviewOpen(true)}
@@ -418,6 +661,7 @@ export default function Page() {
             onDuplicateBlock={handleDuplicateBlock}
             appearance={appearance}
             currency={userCurrency}
+            userName={userName}
           />
         )}
       </main>

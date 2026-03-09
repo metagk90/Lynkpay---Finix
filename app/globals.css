@@ -10,38 +10,38 @@
 
 @layer base {
   :root {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 96%;
-    --card: 0 0% 4%;
-    --card-foreground: 0 0% 96%;
-    --popover: 0 0% 4%;
-    --popover-foreground: 0 0% 96%;
+    --background: 220 20% 2%;
+    --foreground: 210 20% 96%;
+    --card: 220 18% 5%;
+    --card-foreground: 210 20% 96%;
+    --popover: 220 18% 5%;
+    --popover-foreground: 210 20% 96%;
     --primary: 160 84% 39%;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 96%;
-    --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 55%;
-    --accent: 0 0% 10%;
-    --accent-foreground: 0 0% 96%;
+    --primary-foreground: 220 20% 2%;
+    --secondary: 220 14% 10%;
+    --secondary-foreground: 210 20% 96%;
+    --muted: 220 14% 10%;
+    --muted-foreground: 215 12% 52%;
+    --accent: 220 14% 10%;
+    --accent-foreground: 210 20% 96%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 12%;
-    --input: 0 0% 12%;
+    --border: 220 14% 13%;
+    --input: 220 14% 13%;
     --ring: 160 84% 39%;
     --chart-1: 43 96% 56%;
     --chart-2: 160 84% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --sidebar-background: 0 0% 2%;
-    --sidebar-foreground: 0 0% 55%;
+    --radius: 0.625rem;
+    --sidebar-background: 220 20% 2%;
+    --sidebar-foreground: 215 12% 52%;
     --sidebar-primary: 160 84% 39%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 8%;
-    --sidebar-accent-foreground: 0 0% 96%;
-    --sidebar-border: 0 0% 8%;
+    --sidebar-primary-foreground: 220 20% 2%;
+    --sidebar-accent: 220 14% 8%;
+    --sidebar-accent-foreground: 210 20% 96%;
+    --sidebar-border: 220 14% 8%;
     --sidebar-ring: 160 84% 39%;
   }
 }
@@ -50,8 +50,14 @@
   * {
     @apply border-border;
   }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
-    @apply bg-black text-zinc-100;
+    @apply bg-background text-foreground;
+  }
+  ::selection {
+    @apply bg-primary/20 text-foreground;
   }
 }
 
@@ -145,3 +151,46 @@
 .block-hover-glow:hover { box-shadow: 0 0 20px var(--block-glow-color, rgba(16,185,129,0.25)) !important; }
 .block-hover-tilt { transition: transform 0.25s ease; perspective: 600px; }
 .block-hover-tilt:hover { transform: perspective(600px) rotateX(-2deg) rotateY(2deg) scale(1.01); }
+
+/* Hero ticker scroll animation */
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Shimmer effect for buttons and badges */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Subtle pulse glow for CTA elements */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.2); }
+  50% { box-shadow: 0 0 20px 4px hsl(var(--primary) / 0.15); }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Section divider gradient line */
+.section-divider {
+  background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.2), hsl(var(--border)), hsl(var(--primary) / 0.2), transparent);
+}
+
+/* Glass card effect */
+.glass-card {
+  background: hsl(var(--card) / 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid hsl(var(--border) / 0.5);
+}
+
+/* Font heading alias */
+.font-heading {
+  font-family: var(--font-plus-jakarta), var(--font-inter), sans-serif;
+}
