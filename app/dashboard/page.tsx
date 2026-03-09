@@ -56,15 +56,22 @@ export default function Page() {
   const [userEmail, setUserEmail] = useState<string>("")
 
   useEffect(() => {
+    console.log("[v0] Fetching /api/me for user details...")
     fetch("/api/me")
-      .then((res) => (res.ok ? res.json() : null))
+      .then((res) => {
+        console.log("[v0] /api/me response status:", res.status)
+        return res.ok ? res.json() : null
+      })
       .then((data) => {
+        console.log("[v0] /api/me response data:", JSON.stringify(data))
         if (data?.user) {
           if (data.user.username) setUserName(data.user.username)
           if (data.user.email) setUserEmail(data.user.email)
         }
       })
-      .catch(() => {})
+      .catch((err) => {
+        console.log("[v0] /api/me fetch error:", err)
+      })
   }, [])
 
   const [userCountry] = useState<"US" | "CA">("US")
