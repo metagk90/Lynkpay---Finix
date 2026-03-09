@@ -36,6 +36,7 @@ import { DisputesView } from "@/components/payments/disputes-view"
 import { ReportsView } from "@/components/payments/reports-view"
 import { VerificationView } from "@/components/payments/verification-view"
 import { PhonePreview } from "@/components/phone-preview"
+import { SettingsView } from "@/components/settings-view"
 import type { Block } from "@/components/block-item"
 import type { AppearanceConfig } from "@/lib/appearance-types"
 import { DEFAULT_APPEARANCE } from "@/lib/appearance-types"
@@ -56,6 +57,14 @@ export default function Page() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [userName, setUserName] = useState<string>("")
   const [userEmail, setUserEmail] = useState<string>("")
+  const [userProfile, setUserProfile] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    phone: "",
+    country: "",
+  })
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const hasLoadedFromDb = useRef(false)
@@ -68,6 +77,14 @@ export default function Page() {
         if (data?.user) {
           if (data.user.username) setUserName(data.user.username)
           if (data.user.email) setUserEmail(data.user.email)
+          setUserProfile({
+            firstName: data.user.firstName || "",
+            lastName: data.user.lastName || "",
+            username: data.user.username || "",
+            email: data.user.email || "",
+            phone: data.user.phone || "",
+            country: data.user.country || "",
+          })
         }
         if (data?.dashboard) {
           if (data.dashboard.blocks) setBlocks(data.dashboard.blocks)
@@ -497,7 +514,7 @@ export default function Page() {
             ]}
           />
           <SidebarItem icon={GraduationCap} label="Tutorials" />
-          <SidebarItem icon={Settings} label="Settings" />
+          <SidebarItem icon={Settings} label="Settings" active={activeTab === "Settings"} onClick={() => toggleTab("Settings")} />
 
           <p className="px-4 text-[10px] font-black text-zinc-700 uppercase tracking-widest mt-8 mb-4">
             Marketing Tools
@@ -594,6 +611,15 @@ export default function Page() {
           <ReportsView currency={userCurrency} currencySymbol={currencySymbol} />
         ) : activeTab === "Verification" ? (
           <VerificationView />
+        ) : activeTab === "Settings" ? (
+          <SettingsView
+            user={userProfile}
+            onProfileUpdated={({ username, email }) => {
+              setUserName(username)
+              setUserEmail(email)
+              setUserProfile((p) => ({ ...p, username, email }))
+            }}
+          />
         ) : (
           <MyLynkView
             onShowPreview={() => setIsPreviewOpen(true)}
