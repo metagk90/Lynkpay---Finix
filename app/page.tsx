@@ -13,6 +13,8 @@ import { FaqSection } from "@/components/faq-section"
 import { SignupCta } from "@/components/signup-cta"
 import { Footer } from "@/components/footer"
 
+
+
 export default function HomePage() {
   return (
     <>
