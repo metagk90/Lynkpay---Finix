@@ -77,6 +77,7 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
+  const [orderCount, setOrderCount] = useState(0)
   const hasLoadedFromDb = useRef(false)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -111,6 +112,14 @@ export default function Page() {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) setAnalytics(data)
+      })
+      .catch(() => {})
+
+    // Fetch order count in parallel
+    fetch("/api/orders?limit=1")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.total != null) setOrderCount(data.total)
       })
       .catch(() => {})
   }, [])
@@ -519,7 +528,7 @@ export default function Page() {
           />
           <SidebarItem icon={Palette} label="Appearance" active={activeTab === "Appearance"} onClick={() => toggleTab("Appearance")} />
           <SidebarItem icon={BarChart3} label="Statistics" active={activeTab === "Statistics"} onClick={() => toggleTab("Statistics")} />
-          <SidebarItem icon={ShoppingCart} label="Orders" badge={0} active={activeTab === "Orders"} onClick={() => toggleTab("Orders")} />
+          <SidebarItem icon={ShoppingCart} label="Orders" badge={orderCount > 0 ? orderCount : null} active={activeTab === "Orders"} onClick={() => toggleTab("Orders")} />
           <SidebarDropdown
             icon={CreditCard}
             label="Payments"

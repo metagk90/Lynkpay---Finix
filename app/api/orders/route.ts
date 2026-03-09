@@ -50,6 +50,14 @@ export async function GET(req: NextRequest) {
     }
 
     const total = await db.collection("orders").countDocuments(filter)
+
+    // Aggregate total earnings from all completed orders for this seller
+    const earningsAgg = await db.collection("orders").aggregate([
+      { $match: { sellerUsername: session.username, state: { $in: ["SUCCEEDED", "COMPLETED"] } } },
+      { $group: { _id: null, totalEarnings: { $sum: "$amount" } } },
+    ]).toArray()
+    const totalEarnings = earningsAgg.length > 0 ? earningsAgg[0].totalEarnings : 0
+
     const orders = await db
       .collection("orders")
       .find(filter)
