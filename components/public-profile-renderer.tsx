@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import {
   Search, ShoppingCart, User, ArrowRight, ArrowLeft, CreditCard, Lock,
   Check, Loader2, AlertCircle, Play, ExternalLink, Heart, Calendar,
@@ -293,11 +293,36 @@ interface PublicProfileRendererProps {
 
 export function PublicProfileRenderer({ profile, blocks, appearance: a }: PublicProfileRendererProps) {
   const [checkoutBlock, setCheckoutBlock] = useState<Block | null>(null)
-
+  
   const displayName = [profile.firstName, profile.lastName].filter(Boolean).join(" ") || profile.username
   const bgStyle = getBackgroundStyle(a)
   const btnRadius = getButtonRadius(a.buttonShape)
   const activeBlocks = blocks.filter((b) => b.active)
+
+  /* ── Analytics tracking ── */
+  const trackEvent = useCallback((event: string, block?: Block) => {
+    fetch("/api/analytics/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: profile.username,
+        event,
+        blockId: block?.id ?? null,
+        blockTitle: block?.title ?? null,
+        blockType: block?.type ?? null,
+        referrer: typeof document !== "undefined" ? document.referrer : null,
+      }),
+    }).catch(() => {}) // fire-and-forget
+  }, [profile.username])
+
+  // Track page view on mount
+  useEffect(() => {
+    trackEvent("page_view")
+  }, [trackEvent])
+
+  const handleBlockClick = useCallback((block: Block) => {
+    trackEvent("link_click", block)
+  }, [trackEvent])
 
   return (
     <>
@@ -471,7 +496,7 @@ export function PublicProfileRenderer({ profile, blocks, appearance: a }: Public
                         <p className="font-black text-sm mb-1 uppercase" style={{ color: a.textColor }}>{block.title}</p>
                         {block.description && <p className="text-xs leading-relaxed mb-2 line-clamp-2" style={{ color: mutedText }}>{block.description}</p>}
                         <span className="text-sm font-black" style={{ color: a.blockColor }}>${block.price || "0.00"}</span>
-                        <button onClick={() => setCheckoutBlock(block)} className="w-full mt-3 py-2.5 text-xs font-black uppercase tracking-wider transition-all active:scale-95" style={{ borderRadius: btnRadius, backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent", color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor, border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : "none" }}>
+                        <button onClick={() => { handleBlockClick(block); setCheckoutBlock(block) }} className="w-full mt-3 py-2.5 text-xs font-black uppercase tracking-wider transition-all active:scale-95" style={{ borderRadius: btnRadius, backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent", color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor, border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : "none" }}>
                           Buy Now
                         </button>
                       </div>
@@ -488,7 +513,7 @@ export function PublicProfileRenderer({ profile, blocks, appearance: a }: Public
                         <p className="font-black text-sm mb-1 uppercase" style={{ color: a.textColor }}>{block.title}</p>
                         {block.description && <p className="text-xs leading-relaxed mb-2 line-clamp-2" style={{ color: mutedText }}>{block.description}</p>}
                         <span className="text-sm font-black" style={{ color: a.blockColor }}>${block.price || "0.00"}</span>
-                        <button onClick={() => setCheckoutBlock(block)} className="w-full mt-3 py-2.5 text-xs font-black uppercase tracking-wider transition-all active:scale-95" style={{ borderRadius: btnRadius, backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent", color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor, border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : "none" }}>
+                        <button onClick={() => { handleBlockClick(block); setCheckoutBlock(block) }} className="w-full mt-3 py-2.5 text-xs font-black uppercase tracking-wider transition-all active:scale-95" style={{ borderRadius: btnRadius, backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent", color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor, border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : "none" }}>
                           Order Now
                         </button>
                       </div>
@@ -512,7 +537,7 @@ export function PublicProfileRenderer({ profile, blocks, appearance: a }: Public
                     </div>
 
                   ) : block.type === "Link" ? (
-                    <a href={block.url || "#"} target="_blank" rel="noopener noreferrer" className="p-4 flex items-center gap-3 transition-all cursor-pointer" style={{ borderRadius: cardR, backgroundColor: a.buttonStyle === "fill" ? a.blockColor : cardBg, color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor, border: a.cardBorderEnabled ? bdr : a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}22`, boxShadow: shadow, backdropFilter: cardBlur, display: "flex", textDecoration: "none" }}>
+                    <a href={block.url || "#"} target="_blank" rel="noopener noreferrer" onClick={() => handleBlockClick(block)} className="p-4 flex items-center gap-3 transition-all cursor-pointer" style={{ borderRadius: cardR, backgroundColor: a.buttonStyle === "fill" ? a.blockColor : cardBg, color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor, border: a.cardBorderEnabled ? bdr : a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : a.buttonStyle === "fill" ? "none" : `1px solid ${a.blockColor}22`, boxShadow: shadow, backdropFilter: cardBlur, display: "flex", textDecoration: "none" }}>
                       {block.image && <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={block.image} className="w-full h-full object-cover" alt="" crossOrigin="anonymous" /></div>}
                       <div className="flex-1 min-w-0"><span className="text-xs font-black uppercase tracking-wide block truncate">{block.title}</span>{block.url && block.url !== "https://example.com" && <span className="text-[10px] opacity-60 block truncate">{block.url.replace(/https?:\/\//, "")}</span>}</div>
                       <ExternalLink size={14} className="flex-shrink-0 opacity-60" />
@@ -520,7 +545,7 @@ export function PublicProfileRenderer({ profile, blocks, appearance: a }: Public
 
                   ) : block.type === "Video" ? (
                     <div className="overflow-hidden transition-all" style={{ borderRadius: cardR, backgroundColor: cardBg, boxShadow: shadow, backdropFilter: cardBlur, border: bdr }}>
-                      <a href={block.videoUrl || "#"} target="_blank" rel="noopener noreferrer" className="aspect-video relative overflow-hidden flex items-center justify-center block" style={{ background: `linear-gradient(135deg, ${isDark ? "#18181b" : "#e4e4e7"}, ${isDark ? "#27272a" : "#d4d4d8"})` }}>
+                      <a href={block.videoUrl || "#"} target="_blank" rel="noopener noreferrer" onClick={() => handleBlockClick(block)} className="aspect-video relative overflow-hidden flex items-center justify-center block" style={{ background: `linear-gradient(135deg, ${isDark ? "#18181b" : "#e4e4e7"}, ${isDark ? "#27272a" : "#d4d4d8"})` }}>
                         <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: `repeating-linear-gradient(45deg, ${a.blockColor} 0, ${a.blockColor} 1px, transparent 0, transparent 50%)`, backgroundSize: "12px 12px" }} />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                         <div className="w-14 h-14 rounded-full flex items-center justify-center z-10 shadow-lg" style={{ backgroundColor: a.blockColor, boxShadow: `0 4px 20px ${a.blockColor}44` }}>
@@ -578,7 +603,7 @@ export function PublicProfileRenderer({ profile, blocks, appearance: a }: Public
                         <p className="font-black text-sm mb-1 uppercase" style={{ color: a.textColor }}>{block.title}</p>
                         {block.description && <p className="text-xs leading-relaxed mb-2 line-clamp-2" style={{ color: mutedText }}>{block.description}</p>}
                         {block.price && block.price !== "0.00" && <span className="text-sm font-black" style={{ color: a.blockColor }}>${block.price}</span>}
-                        <button onClick={() => setCheckoutBlock(block)} className="w-full mt-3 py-2.5 text-xs font-black uppercase tracking-wider active:scale-95" style={{ borderRadius: btnRadius, backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent", color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor, border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : "none" }}>Enroll Now</button>
+                        <button onClick={() => { handleBlockClick(block); setCheckoutBlock(block) }} className="w-full mt-3 py-2.5 text-xs font-black uppercase tracking-wider active:scale-95" style={{ borderRadius: btnRadius, backgroundColor: a.buttonStyle === "fill" ? a.blockColor : "transparent", color: a.buttonStyle === "fill" ? a.btnTextColor : a.blockColor, border: a.buttonStyle === "outline" ? `2px solid ${a.blockColor}` : "none" }}>Enroll Now</button>
                       </div>
                     </div>
 

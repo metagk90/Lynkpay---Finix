@@ -41,14 +41,21 @@ import type { Block } from "@/components/block-item"
 import type { AppearanceConfig } from "@/lib/appearance-types"
 import { DEFAULT_APPEARANCE } from "@/lib/appearance-types"
 
-const chartData = [
-  { name: "08 Feb", views: 8, clicks: 3 },
-  { name: "09 Feb", views: 15, clicks: 8 },
-  { name: "10 Feb", views: 30, clicks: 18 },
-  { name: "11 Feb", views: 85, clicks: 45 },
-  { name: "12 Feb", views: 32, clicks: 19 },
-  { name: "13 Feb", views: 18, clicks: 10 },
+const fallbackChartData = [
+  { name: "08 Feb", views: 0, clicks: 0 },
+  { name: "09 Feb", views: 0, clicks: 0 },
+  { name: "10 Feb", views: 0, clicks: 0 },
+  { name: "11 Feb", views: 0, clicks: 0 },
+  { name: "12 Feb", views: 0, clicks: 0 },
+  { name: "13 Feb", views: 0, clicks: 0 },
 ]
+
+interface AnalyticsData {
+  totals: { views: number; clicks: number; purchases: number; uniqueVisitors: number; clickRate: string }
+  changes: { views: string; clicks: string; purchases: string }
+  chartData: { date: string; views: number; clicks: number; purchases: number }[]
+  topBlocks: { blockId: number; blockTitle: string; blockType: string; clicks: number }[]
+}
 
 export default function Page() {
   const router = useRouter()
@@ -67,10 +74,12 @@ export default function Page() {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const hasLoadedFromDb = useRef(false)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
+    // Fetch user data + dashboard
     fetch("/api/me")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -94,6 +103,14 @@ export default function Page() {
       })
       .catch(() => {})
       .finally(() => setIsLoading(false))
+
+    // Fetch analytics in parallel
+    fetch("/api/analytics?days=30")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) setAnalytics(data)
+      })
+      .catch(() => {})
   }, [])
 
   /** Debounced auto-save to MongoDB */
@@ -596,11 +613,21 @@ export default function Page() {
         </header>
 
         {activeTab === "Home" ? (
-          <HomeView chartData={chartData} currency={userCurrency} currencySymbol={currencySymbol} userName={userName} userEmail={userEmail} />
+          <HomeView
+            chartData={analytics?.chartData?.length
+              ? analytics.chartData.map((d) => ({ name: d.date.slice(5).replace("-", " "), views: d.views, clicks: d.clicks }))
+              : fallbackChartData
+            }
+            currency={userCurrency}
+            currencySymbol={currencySymbol}
+            userName={userName}
+            userEmail={userEmail}
+            analytics={analytics ?? undefined}
+          />
         ) : activeTab === "Appearance" ? (
           <AppearanceView blocks={blocks} appearance={appearance} onChange={handleAppearanceChange} />
         ) : activeTab === "Statistics" ? (
-          <StatisticsView currency={userCurrency} currencySymbol={currencySymbol} />
+          <StatisticsView currency={userCurrency} currencySymbol={currencySymbol} analytics={analytics ?? undefined} />
         ) : activeTab === "Orders" ? (
           <OrdersView />
         ) : activeTab === "Transactions" ? (

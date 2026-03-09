@@ -38,15 +38,23 @@ interface ChartDataPoint {
   clicks: number
 }
 
+interface AnalyticsData {
+  totals: { views: number; clicks: number; purchases: number; uniqueVisitors: number; clickRate: string }
+  changes: { views: string; clicks: string; purchases: string }
+  chartData: { date: string; views: number; clicks: number; purchases: number }[]
+  topBlocks: { blockId: number; blockTitle: string; blockType: string; clicks: number }[]
+}
+
 interface HomeViewProps {
   chartData: ChartDataPoint[]
   currency?: string
   currencySymbol?: string
   userName?: string
   userEmail?: string
+  analytics?: AnalyticsData
 }
 
-export function HomeView({ chartData, currency = "USD", currencySymbol = "$", userName = "", userEmail = "" }: HomeViewProps) {
+export function HomeView({ chartData, currency = "USD", currencySymbol = "$", userName = "", userEmail = "", analytics }: HomeViewProps) {
   const displayName = userName || "Creator"
   const avatarSeed = userName || "User"
   return (
@@ -166,9 +174,9 @@ export function HomeView({ chartData, currency = "USD", currencySymbol = "$", us
         {[
           {
             label: "Page Views",
-            value: "2,847",
-            change: "+12.5%",
-            trend: "up" as const,
+            value: analytics?.totals.views.toLocaleString() ?? "0",
+            change: analytics?.changes.views ?? "+0%",
+            trend: (analytics?.changes.views?.startsWith("-") ? "down" : "up") as const,
             icon: Eye,
             color: "text-amber-400",
             bgColor: "bg-amber-400/10",
@@ -176,19 +184,19 @@ export function HomeView({ chartData, currency = "USD", currencySymbol = "$", us
           },
           {
             label: "Total Sales",
-            value: "184",
-            change: "+8.2%",
-            trend: "up" as const,
+            value: analytics?.totals.purchases.toLocaleString() ?? "0",
+            change: analytics?.changes.purchases ?? "+0%",
+            trend: (analytics?.changes.purchases?.startsWith("-") ? "down" : "up") as const,
             icon: ShoppingCart,
             color: "text-emerald-400",
             bgColor: "bg-emerald-400/10",
             borderColor: "border-emerald-400/20",
           },
           {
-            label: "Revenue",
-            value: `${currencySymbol}12.4K`,
-            change: "+23.1%",
-            trend: "up" as const,
+            label: "Click Rate",
+            value: `${analytics?.totals.clickRate ?? "0"}%`,
+            change: analytics?.changes.clicks ?? "+0%",
+            trend: (analytics?.changes.clicks?.startsWith("-") ? "down" : "up") as const,
             icon: DollarSign,
             color: "text-emerald-400",
             bgColor: "bg-emerald-400/10",
@@ -196,9 +204,9 @@ export function HomeView({ chartData, currency = "USD", currencySymbol = "$", us
           },
           {
             label: "Unique Visitors",
-            value: "1,203",
-            change: "-3.4%",
-            trend: "down" as const,
+            value: analytics?.totals.uniqueVisitors.toLocaleString() ?? "0",
+            change: analytics?.changes.views ?? "+0%",
+            trend: (analytics?.changes.views?.startsWith("-") ? "down" : "up") as const,
             icon: Users,
             color: "text-sky-400",
             bgColor: "bg-sky-400/10",
@@ -234,19 +242,19 @@ export function HomeView({ chartData, currency = "USD", currencySymbol = "$", us
         {[
           {
             label: "Click Rate",
-            value: "68.4%",
-            change: "+5.1%",
-            trend: "up" as const,
+            value: `${analytics?.totals.clickRate ?? "0"}%`,
+            change: analytics?.changes.clicks ?? "+0%",
+            trend: (analytics?.changes.clicks?.startsWith("-") ? "down" : "up") as const,
             icon: MousePointerClick,
             color: "text-violet-400",
             bgColor: "bg-violet-400/10",
             borderColor: "border-violet-400/20",
           },
           {
-            label: "Avg. Order",
-            value: `${currencySymbol}67`,
-            change: "+2.8%",
-            trend: "up" as const,
+            label: "Total Clicks",
+            value: analytics?.totals.clicks.toLocaleString() ?? "0",
+            change: analytics?.changes.clicks ?? "+0%",
+            trend: (analytics?.changes.clicks?.startsWith("-") ? "down" : "up") as const,
             icon: DollarSign,
             color: "text-amber-400",
             bgColor: "bg-amber-400/10",
@@ -254,19 +262,19 @@ export function HomeView({ chartData, currency = "USD", currencySymbol = "$", us
           },
           {
             label: "Link Clicks",
-            value: "1,932",
-            change: "+15.7%",
-            trend: "up" as const,
+            value: analytics?.totals.clicks.toLocaleString() ?? "0",
+            change: analytics?.changes.clicks ?? "+0%",
+            trend: (analytics?.changes.clicks?.startsWith("-") ? "down" : "up") as const,
             icon: LinkIcon,
             color: "text-emerald-400",
             bgColor: "bg-emerald-400/10",
             borderColor: "border-emerald-400/20",
           },
           {
-            label: "Repeat Buyers",
-            value: "47",
-            change: "-1.2%",
-            trend: "down" as const,
+            label: "Purchases",
+            value: analytics?.totals.purchases.toLocaleString() ?? "0",
+            change: analytics?.changes.purchases ?? "+0%",
+            trend: (analytics?.changes.purchases?.startsWith("-") ? "down" : "up") as const,
             icon: Users,
             color: "text-rose-400",
             bgColor: "bg-rose-400/10",
@@ -305,12 +313,12 @@ export function HomeView({ chartData, currency = "USD", currencySymbol = "$", us
             <div className="flex gap-8 pt-4">
               <div className="flex flex-col">
                 <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">Views</span>
-                <span className="text-2xl font-black text-amber-400">77</span>
+                <span className="text-2xl font-black text-amber-400">{analytics?.totals.views.toLocaleString() ?? "0"}</span>
               </div>
               <div className="w-px h-8 bg-zinc-800 self-end mb-1" />
               <div className="flex flex-col">
                 <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">Clicks</span>
-                <span className="text-2xl font-black text-emerald-500">75</span>
+                <span className="text-2xl font-black text-emerald-500">{analytics?.totals.clicks.toLocaleString() ?? "0"}</span>
               </div>
             </div>
           </div>

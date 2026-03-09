@@ -126,13 +126,23 @@ function MetricCard({ label, value, change, trend, icon: Icon, color, bgColor, b
   )
 }
 
-export function StatisticsView({ currency = "USD", currencySymbol = "$" }: { currency?: string; currencySymbol?: string }) {
+interface AnalyticsData {
+  totals: { views: number; clicks: number; purchases: number; uniqueVisitors: number; clickRate: string }
+  changes: { views: string; clicks: string; purchases: string }
+  chartData: { date: string; views: number; clicks: number; purchases: number }[]
+  topBlocks: { blockId: number; blockTitle: string; blockType: string; clicks: number }[]
+}
+
+export function StatisticsView({ currency = "USD", currencySymbol = "$", analytics }: { currency?: string; currencySymbol?: string; analytics?: AnalyticsData }) {
+  const t = analytics?.totals
+  const c = analytics?.changes
+
   const metrics: MetricCardProps[] = [
     {
       label: "Total Views",
-      value: "12,847",
-      change: "+14.2%",
-      trend: "up",
+      value: t?.views.toLocaleString() ?? "0",
+      change: c?.views ?? "+0%",
+      trend: c?.views?.startsWith("-") ? "down" : "up",
       icon: Eye,
       color: "text-amber-400",
       bgColor: "bg-amber-400/10",
@@ -140,9 +150,9 @@ export function StatisticsView({ currency = "USD", currencySymbol = "$" }: { cur
     },
     {
       label: "Total Clicks",
-      value: "5,432",
-      change: "+9.8%",
-      trend: "up",
+      value: t?.clicks.toLocaleString() ?? "0",
+      change: c?.clicks ?? "+0%",
+      trend: c?.clicks?.startsWith("-") ? "down" : "up",
       icon: MousePointerClick,
       color: "text-emerald-400",
       bgColor: "bg-emerald-400/10",
@@ -150,9 +160,9 @@ export function StatisticsView({ currency = "USD", currencySymbol = "$" }: { cur
     },
     {
       label: "Unique Visitors",
-      value: "3,891",
-      change: "+6.1%",
-      trend: "up",
+      value: t?.uniqueVisitors.toLocaleString() ?? "0",
+      change: c?.views ?? "+0%",
+      trend: c?.views?.startsWith("-") ? "down" : "up",
       icon: Users,
       color: "text-sky-400",
       bgColor: "bg-sky-400/10",
@@ -160,35 +170,49 @@ export function StatisticsView({ currency = "USD", currencySymbol = "$" }: { cur
     },
     {
       label: "Total Sales",
-      value: "284",
-      change: "+18.3%",
-      trend: "up",
+      value: t?.purchases.toLocaleString() ?? "0",
+      change: c?.purchases ?? "+0%",
+      trend: c?.purchases?.startsWith("-") ? "down" : "up",
       icon: ShoppingCart,
       color: "text-emerald-400",
       bgColor: "bg-emerald-400/10",
       borderColor: "border-emerald-400/20",
     },
     {
-      label: "Revenue",
-      value: `${currencySymbol}25.6K`,
-      change: "+23.1%",
-      trend: "up",
+      label: "Click Rate",
+      value: `${t?.clickRate ?? "0"}%`,
+      change: c?.clicks ?? "+0%",
+      trend: c?.clicks?.startsWith("-") ? "down" : "up",
       icon: DollarSign,
       color: "text-emerald-400",
       bgColor: "bg-emerald-400/10",
       borderColor: "border-emerald-400/20",
     },
     {
-      label: "Click Rate",
-      value: "42.3%",
-      change: "-2.1%",
-      trend: "down",
+      label: "Conversion",
+      value: t && t.views > 0 ? `${((t.purchases / t.views) * 100).toFixed(1)}%` : "0%",
+      change: c?.purchases ?? "+0%",
+      trend: c?.purchases?.startsWith("-") ? "down" : "up",
       icon: TrendingUp,
       color: "text-rose-400",
       bgColor: "bg-rose-400/10",
       borderColor: "border-rose-400/20",
     },
   ]
+
+  // Map real analytics chart data or fall back to hardcoded sample data
+  const trafficChartData = analytics?.chartData?.length
+    ? analytics.chartData.slice(-7).map((d) => ({
+        name: d.date.slice(5).replace("-", " "),
+        views: d.views,
+        clicks: d.clicks,
+      }))
+    : dailyTrafficData
+
+  // Top blocks from real analytics or fallback
+  const topLinks = analytics?.topBlocks?.length
+    ? analytics.topBlocks.map((b) => ({ name: b.blockTitle || "Untitled", clicks: b.clicks, views: 0 }))
+    : topLinksData
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -227,7 +251,7 @@ export function StatisticsView({ currency = "USD", currencySymbol = "$" }: { cur
 
         <div className="h-[280px] w-full" style={{ minWidth: 0 }}>
           <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={dailyTrafficData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }} barGap={4}>
+            <BarChart data={trafficChartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }} barGap={4}>
               <CartesianGrid vertical={false} stroke="#1f2937" strokeDasharray="3 3" />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#4b5563", fontSize: 11, fontWeight: 700 }} dy={10} />
               <YAxis axisLine={false} tickLine={false} tick={{ fill: "#4b5563", fontSize: 10, fontWeight: 700 }} />
@@ -236,18 +260,13 @@ export function StatisticsView({ currency = "USD", currencySymbol = "$" }: { cur
                 contentStyle={{ backgroundColor: "#000", borderRadius: "16px", border: "1px solid #27272a", fontSize: "12px", fontWeight: 700 }}
               />
               <Bar dataKey="views" radius={[6, 6, 0, 0]} barSize={14}>
-                {dailyTrafficData.map((_, i) => (
+                {trafficChartData.map((_, i) => (
                   <Cell key={i} fill="#fbbf24" fillOpacity={0.85} />
                 ))}
               </Bar>
               <Bar dataKey="clicks" radius={[6, 6, 0, 0]} barSize={14}>
-                {dailyTrafficData.map((_, i) => (
+                {trafficChartData.map((_, i) => (
                   <Cell key={i} fill="#10b981" />
-                ))}
-              </Bar>
-              <Bar dataKey="visitors" radius={[6, 6, 0, 0]} barSize={14}>
-                {dailyTrafficData.map((_, i) => (
-                  <Cell key={i} fill="#38bdf8" fillOpacity={0.7} />
                 ))}
               </Bar>
             </BarChart>
@@ -361,7 +380,7 @@ export function StatisticsView({ currency = "USD", currencySymbol = "$" }: { cur
           </div>
 
           <div className="flex flex-col gap-3">
-            {topLinksData.map((link, i) => (
+            {topLinks.map((link, i) => (
               <div
                 key={i}
                 className="flex items-center justify-between bg-zinc-800/30 border border-zinc-800/30 rounded-xl px-4 py-3 hover:border-zinc-700/50 transition-all"
