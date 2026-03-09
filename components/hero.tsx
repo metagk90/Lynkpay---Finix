@@ -230,7 +230,7 @@ function MobileAnimatedContainer() {
             <Sparkles className="h-3.5 w-3.5 text-primary" />
             <span className="text-[11px] font-medium text-primary">Page Creator</span>
           </div>
-          <Image src="/logo.svg" alt="lynkpay.co logo" width={80} height={10} className="h-4 w-auto object-contain" />
+          <Image src="/logo.svg" alt="lynkpay.co logo" width={80} height={10} className="object-contain" style={{ width: "auto", height: "1rem" }} />
         </div>
 
         <div className="mt-6 rounded-2xl border border-border/40 bg-secondary/30 p-4">
@@ -396,7 +396,7 @@ export function Hero() {
             custom={3}
             className="mt-5 flex max-w-full items-center gap-2 rounded-xl border border-border/60 bg-card/80 px-3.5 py-2.5 backdrop-blur-sm sm:mt-6 sm:px-4"
           >
-            <Image src="/logo.svg" alt="lynkpay.co logo" width={120} height={20} className="h-5 w-auto object-contain" />
+            <Image src="/logo.svg" alt="lynkpay.co logo" width={120} height={20} className="object-contain" style={{ width: "auto", height: "1.25rem" }} />
             <span className="text-xs text-muted-foreground sm:text-sm">lynkpay.co/</span>
             <span className="max-w-[105px] truncate text-xs font-semibold text-primary sm:max-w-none sm:text-sm">yourname</span>
           </motion.div>

@@ -36,7 +36,7 @@ export function Header() {
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-[72px] lg:px-8">
         <Link href="/" className="flex items-center">
-          <Image src="/logo.svg" alt="LynkPay Logo" width={120} height={32} priority />
+          <Image src="/logo.svg" alt="LynkPay Logo" width={120} height={32} style={{ width: "auto", height: "auto" }} priority />
         </Link>
 
         <div className="hidden items-center gap-0.5 md:flex">
