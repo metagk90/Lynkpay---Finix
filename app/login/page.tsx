@@ -2,7 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Mail, Lock, ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label"
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get("redirect") || "/dashboard"
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
   const [formData, setFormData] = useState({
@@ -46,7 +48,7 @@ export default function LoginPage() {
         return
       }
 
-      router.push("/dashboard")
+      router.push(redirectTo)
     } catch {
       setErrorMessage("Unable to connect to server. Please try again.")
     } finally {
