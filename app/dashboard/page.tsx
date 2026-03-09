@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import {
   Home,
   Link as LinkIcon,
@@ -49,6 +50,7 @@ const chartData = [
 ]
 
 export default function Page() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState("Home")
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -56,23 +58,25 @@ export default function Page() {
   const [userEmail, setUserEmail] = useState<string>("")
 
   useEffect(() => {
-    console.log("[v0] Fetching /api/me for user details...")
     fetch("/api/me")
-      .then((res) => {
-        console.log("[v0] /api/me response status:", res.status)
-        return res.ok ? res.json() : null
-      })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        console.log("[v0] /api/me response data:", JSON.stringify(data))
         if (data?.user) {
           if (data.user.username) setUserName(data.user.username)
           if (data.user.email) setUserEmail(data.user.email)
         }
       })
-      .catch((err) => {
-        console.log("[v0] /api/me fetch error:", err)
-      })
+      .catch(() => {})
   }, [])
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await fetch("/api/logout", { method: "POST" })
+    } catch {
+      /* cookie will still be cleared by maxAge:0 */
+    }
+    router.push("/login")
+  }, [router])
 
   const [userCountry] = useState<"US" | "CA">("US")
   const userCurrency = userCountry === "CA" ? "CAD" : "USD"
@@ -392,7 +396,7 @@ export default function Page() {
               </div>
             </div>
           )}
-          <SidebarItem icon={LogOut} label="Logout" />
+          <SidebarItem icon={LogOut} label="Logout" onClick={handleLogout} />
         </div>
       </aside>
 
