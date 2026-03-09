@@ -88,10 +88,12 @@ function CheckoutOverlay({
   block,
   a,
   onBack,
+  username,
 }: {
   block: Block
   a: AppearanceConfig
   onBack: () => void
+  username: string
 }) {
   const [step, setStep] = useState<"info" | "payment" | "processing" | "success" | "error">("info")
   const [customer, setCustomer] = useState({ firstName: "", lastName: "", email: "", phone: "" })
@@ -130,6 +132,18 @@ function CheckoutOverlay({
       if (!res.ok || data.error) throw new Error(data.error || "Payment failed")
       setTxnId(data.transactionId)
       setStep("success")
+      // Track the purchase event for analytics
+      fetch("/api/analytics/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username,
+          event: "purchase",
+          blockId: block.id,
+          blockTitle: block.title,
+          blockType: block.type,
+        }),
+      }).catch(() => {})
     } catch (err: unknown) {
       let msg = err instanceof Error ? err.message : "Payment failed. Please try again."
       msg = msg.replace(/Finix API error:\s*/gi, "").replace(/\|\s*\{.*\}/s, "").trim()
@@ -326,7 +340,7 @@ export function PublicProfileRenderer({ profile, blocks, appearance: a }: Public
 
   return (
     <>
-      {checkoutBlock && <CheckoutOverlay block={checkoutBlock} a={a} onBack={() => setCheckoutBlock(null)} />}
+      {checkoutBlock && <CheckoutOverlay block={checkoutBlock} a={a} onBack={() => setCheckoutBlock(null)} username={profile.username} />}
 
       <div
         className={`min-h-screen flex flex-col items-center ${

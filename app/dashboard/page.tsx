@@ -106,11 +106,17 @@ export default function Page() {
 
     // Fetch analytics in parallel
     fetch("/api/analytics?days=30")
-      .then((res) => (res.ok ? res.json() : null))
+      .then((res) => {
+        console.log("[v0] Analytics response status:", res.status)
+        return res.ok ? res.json() : null
+      })
       .then((data) => {
+        console.log("[v0] Analytics data:", JSON.stringify(data?.totals))
         if (data) setAnalytics(data)
       })
-      .catch(() => {})
+      .catch((err) => {
+        console.log("[v0] Analytics fetch error:", err)
+      })
   }, [])
 
   /** Debounced auto-save to MongoDB */
