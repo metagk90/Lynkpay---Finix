@@ -56,6 +56,7 @@ export default function Page() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [userName, setUserName] = useState<string>("")
   const [userEmail, setUserEmail] = useState<string>("")
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     fetch("/api/me")
@@ -67,6 +68,7 @@ export default function Page() {
         }
       })
       .catch(() => {})
+      .finally(() => setIsLoading(false))
   }, [])
 
   const handleLogout = useCallback(async () => {
@@ -315,6 +317,89 @@ export default function Page() {
   const toggleTab = (tab: string) => {
     setActiveTab(tab)
     setIsSidebarOpen(false)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-black font-sans text-zinc-100">
+        {/* Sidebar skeleton */}
+        <aside className="hidden lg:flex fixed inset-y-0 left-0 w-72 bg-[#050505] border-r border-zinc-900/50 p-6 flex-col gap-10">
+          <div className="flex items-center gap-1 px-4 py-2">
+            <div className="h-8 w-32 rounded-lg bg-zinc-900 animate-pulse" />
+          </div>
+          <div className="flex flex-col gap-3 mt-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+                <div className="h-5 w-5 rounded-md bg-zinc-900 animate-pulse" />
+                <div className="h-4 rounded-md bg-zinc-900 animate-pulse" style={{ width: `${60 + Math.random() * 40}%` }} />
+              </div>
+            ))}
+          </div>
+          <div className="mt-auto pt-6 border-t border-zinc-900/50">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-zinc-900/60 border border-zinc-800/40">
+              <div className="w-10 h-10 rounded-full bg-zinc-800 animate-pulse shrink-0" />
+              <div className="flex flex-col gap-1.5 flex-1">
+                <div className="h-3.5 w-24 rounded bg-zinc-800 animate-pulse" />
+                <div className="h-2.5 w-32 rounded bg-zinc-800/60 animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main content skeleton */}
+        <main className="flex-1 lg:ml-72 h-screen p-6 md:p-10">
+          <header className="flex justify-between items-center mb-10">
+            <div className="flex flex-col gap-2">
+              <div className="h-8 w-36 rounded-lg bg-zinc-900 animate-pulse" />
+              <div className="h-4 w-48 rounded bg-zinc-900/60 animate-pulse" />
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-11 h-11 rounded-2xl bg-zinc-900 animate-pulse" />
+              <div className="hidden sm:flex items-center gap-3 bg-zinc-900 rounded-2xl p-1.5 pr-4">
+                <div className="w-9 h-9 rounded-xl bg-zinc-800 animate-pulse" />
+                <div className="h-4 w-20 rounded bg-zinc-800 animate-pulse" />
+              </div>
+            </div>
+          </header>
+
+          {/* Stats row skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="rounded-2xl border border-zinc-900/50 bg-zinc-950 p-5">
+                <div className="h-3 w-16 rounded bg-zinc-900 animate-pulse mb-3" />
+                <div className="h-7 w-24 rounded bg-zinc-900 animate-pulse mb-2" />
+                <div className="h-3 w-20 rounded bg-zinc-900/60 animate-pulse" />
+              </div>
+            ))}
+          </div>
+
+          {/* Chart skeleton */}
+          <div className="rounded-2xl border border-zinc-900/50 bg-zinc-950 p-6 mb-8">
+            <div className="h-5 w-32 rounded bg-zinc-900 animate-pulse mb-6" />
+            <div className="flex items-end gap-3 h-40">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-1 rounded-t-md bg-zinc-900 animate-pulse"
+                  style={{ height: `${30 + Math.random() * 70}%` }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Profile card skeleton */}
+          <div className="rounded-2xl border border-zinc-900/50 bg-zinc-950 p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-xl bg-zinc-900 animate-pulse" />
+              <div className="flex flex-col gap-2">
+                <div className="h-5 w-32 rounded bg-zinc-900 animate-pulse" />
+                <div className="h-3 w-48 rounded bg-zinc-900/60 animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   return (
