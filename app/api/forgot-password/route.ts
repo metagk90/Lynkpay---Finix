@@ -3,6 +3,8 @@ import { z } from "zod"
 import { randomBytes, createHmac } from "node:crypto"
 
 import clientPromise from "@/lib/mongodb"
+import { sendEmail } from "@/lib/email"
+import { passwordResetEmail } from "@/lib/email-templates"
 
 const DB = process.env.MONGODB_DB || "lynkpay"
 const TOKEN_EXPIRY_MINUTES = 30
@@ -50,13 +52,18 @@ export async function POST(request: Request) {
       createdAt: new Date(),
     })
 
-    // In production, send this via email. For now, return the token in the response.
-    // The raw token is what the user receives; the hashed version is what we store.
+    // Send password reset email
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://lynkpay.co"
+    const resetUrl = `${baseUrl}/reset-password?token=${rawToken}`
+    const { subject, html } = passwordResetEmail({
+      firstName: (user as { username?: string }).username || "there",
+      resetUrl,
+      expiresIn: `${TOKEN_EXPIRY_MINUTES} minutes`,
+    })
+    await sendEmail({ to: email, subject, html })
+
     return NextResponse.json({
-      message: "If that email exists, a reset link has been generated.",
-      // Include the reset token so the UI can display the link
-      // In production, remove this and send via email instead
-      resetToken: rawToken,
+      message: "If that email exists, a reset link has been sent.",
     })
   } catch {
     return NextResponse.json({ message: "Something went wrong. Please try again." }, { status: 500 })

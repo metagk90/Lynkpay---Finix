@@ -4,6 +4,8 @@ import { createHmac } from "node:crypto"
 
 import { hashPassword } from "@/lib/auth"
 import clientPromise from "@/lib/mongodb"
+import { sendEmail } from "@/lib/email"
+import { passwordChangedEmail } from "@/lib/email-templates"
 
 const DB = process.env.MONGODB_DB || "lynkpay"
 
@@ -52,6 +54,13 @@ export async function POST(request: Request) {
 
     // Delete all reset tokens for this user
     await db.collection("password_reset_tokens").deleteMany({ userId: resetRecord.userId })
+
+    // Send password changed security notification (fire-and-forget)
+    const { subject, html } = passwordChangedEmail({
+      firstName: (resetRecord as { email?: string }).email?.split("@")[0] || "there",
+      changedAt: new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" }),
+    })
+    sendEmail({ to: resetRecord.email, subject, html }).catch(() => {})
 
     return NextResponse.json({ message: "Password has been reset successfully. You can now log in." })
   } catch {

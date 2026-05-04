@@ -4,6 +4,8 @@ import { ObjectId } from "mongodb"
 import { z } from "zod"
 import clientPromise from "@/lib/mongodb"
 import { SESSION_COOKIE_NAME, verifySessionToken, verifyPassword, hashPassword } from "@/lib/auth"
+import { sendEmail } from "@/lib/email"
+import { passwordChangedEmail } from "@/lib/email-templates"
 
 const DB = process.env.MONGODB_DB || "lynkpay"
 
@@ -56,6 +58,15 @@ export async function PUT(request: Request) {
       { _id: new ObjectId(session.sub) },
       { $set: { passwordHash: newHash, updatedAt: new Date() } },
     )
+
+    // Send password changed security notification (fire-and-forget)
+    if (session.email) {
+      const { subject, html } = passwordChangedEmail({
+        firstName: session.username || "there",
+        changedAt: new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" }),
+      })
+      sendEmail({ to: session.email, subject, html }).catch(() => {})
+    }
 
     return NextResponse.json({ message: "Password updated successfully" })
   } catch {
