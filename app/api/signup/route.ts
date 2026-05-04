@@ -4,6 +4,8 @@ import { z } from "zod"
 import { hashPassword, createSessionToken, SESSION_COOKIE_NAME, SESSION_DURATION_SECONDS } from "@/lib/auth"
 import { upsertLynkPageOnSignup } from "@/lib/lynk-data"
 import clientPromise from "@/lib/mongodb"
+import { sendEmail } from "@/lib/email"
+import { welcomeEmail } from "@/lib/email-templates"
 
 const signupSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(100),
@@ -77,6 +79,15 @@ export async function POST(request: Request) {
     } catch {
       // Keep signup successful even if secondary page bootstrap fails.
     }
+
+    // Send welcome email (fire-and-forget, don't block signup)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://lynkpay.co"
+    const { subject, html } = welcomeEmail({
+      firstName: input.firstName,
+      username: input.username,
+      loginUrl: `${baseUrl}/dashboard`,
+    })
+    sendEmail({ to: input.email, subject, html }).catch(() => {})
 
     // Auto-login: set session cookie so user goes straight to dashboard
     const token = createSessionToken({

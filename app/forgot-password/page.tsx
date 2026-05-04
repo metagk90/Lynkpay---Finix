@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react"
 import Link from "next/link"
-import { Mail, ArrowLeft, CheckCircle2, Copy, Check } from "lucide-react"
+import { Mail, ArrowLeft, CheckCircle2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,8 +13,7 @@ export default function ForgotPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
   const [email, setEmail] = useState("")
-  const [resetLink, setResetLink] = useState("")
-  const [copied, setCopied] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -35,13 +34,7 @@ export default function ForgotPasswordPage() {
         return
       }
 
-      if (data.resetToken) {
-        const origin = window.location.origin
-        setResetLink(`${origin}/reset-password?token=${data.resetToken}`)
-      } else {
-        // No token returned -- means the email doesn't exist, but we still show success
-        setResetLink("sent")
-      }
+      setEmailSent(true)
     } catch {
       setErrorMessage("Unable to connect to server. Please try again.")
     } finally {
@@ -49,13 +42,7 @@ export default function ForgotPasswordPage() {
     }
   }
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(resetLink)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  if (resetLink) {
+  if (emailSent) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="w-full max-w-md">
@@ -66,29 +53,14 @@ export default function ForgotPasswordPage() {
               </div>
               <CardTitle className="text-2xl font-bold text-foreground">Check Your Email</CardTitle>
               <CardDescription className="text-muted-foreground">
-                If an account exists for <span className="font-medium text-foreground">{email}</span>, a password reset link has been generated.
+                If an account exists for <span className="font-medium text-foreground">{email}</span>, a password reset link has been sent to your inbox.
               </CardDescription>
             </CardHeader>
 
             <CardContent className="flex flex-col gap-4">
-              {resetLink !== "sent" && (
-                <div className="rounded-lg border border-border/50 bg-muted/30 p-3">
-                  <p className="mb-2 text-xs font-medium text-muted-foreground">Reset Link (demo mode -- in production this is sent via email):</p>
-                  <div className="flex items-center gap-2">
-                    <code className="flex-1 truncate text-xs text-primary">{resetLink}</code>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={handleCopy}>
-                      {copied ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
-                      <span className="sr-only">Copy link</span>
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {resetLink !== "sent" && (
-                <Button asChild className="w-full">
-                  <Link href={resetLink}>Open Reset Page</Link>
-                </Button>
-              )}
+              <p className="text-sm text-muted-foreground text-center">
+                Please check your email and click the link to reset your password. The link will expire in 30 minutes.
+              </p>
 
               <Link
                 href="/login"

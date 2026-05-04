@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createIdentity, createPaymentInstrument, createTransfer } from "@/lib/finix"
 import clientPromise from "@/lib/mongodb"
+import { sendEmail } from "@/lib/email"
+import { orderConfirmationEmail, newSaleNotificationEmail } from "@/lib/email-templates"
 
 const DB = process.env.MONGODB_DB || "lynkpay"
 
@@ -108,6 +110,53 @@ export async function POST(req: NextRequest) {
       })
     } catch {
       // Order save failed but payment succeeded -- don't fail the response
+    }
+
+    // Send transactional emails (fire-and-forget)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://lynkpay.co"
+    const amountFormatted = (Math.round(amount) / 100).toFixed(2)
+    const currencySymbol = currency === "CAD" ? "CA$" : "$"
+    const purchaseDate = new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })
+
+    // 1. Order confirmation to buyer
+    const buyerEmail = orderConfirmationEmail({
+      customerName: customer.firstName,
+      orderId: transfer.id,
+      productTitle: productTitle || "Purchase",
+      productType: body.productType || "Digital Product",
+      amount: amountFormatted,
+      currency: currencySymbol,
+      sellerName: body.sellerUsername || "Seller",
+      sellerUsername: body.sellerUsername || "",
+      purchaseDate,
+    })
+    sendEmail({ to: customer.email, subject: buyerEmail.subject, html: buyerEmail.html }).catch(() => {})
+
+    // 2. Sale notification to seller (if seller exists)
+    if (body.sellerUsername) {
+      try {
+        const mongo = await clientPromise
+        const db = mongo.db(DB)
+        const seller = await db.collection("users").findOne(
+          { username: body.sellerUsername },
+          { projection: { email: 1, firstName: 1 } },
+        )
+        if (seller?.email) {
+          const sellerEmail = newSaleNotificationEmail({
+            sellerName: seller.firstName || body.sellerUsername,
+            productTitle: productTitle || "Purchase",
+            amount: amountFormatted,
+            currency: currencySymbol,
+            customerEmail: customer.email,
+            orderId: transfer.id,
+            saleDate: purchaseDate,
+            dashboardUrl: `${baseUrl}/dashboard`,
+          })
+          sendEmail({ to: seller.email, subject: sellerEmail.subject, html: sellerEmail.html }).catch(() => {})
+        }
+      } catch {
+        // Seller lookup failed, skip notification
+      }
     }
 
     return NextResponse.json({
