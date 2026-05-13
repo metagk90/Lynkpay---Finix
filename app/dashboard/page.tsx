@@ -636,7 +636,7 @@ export default function Page() {
             analytics={analytics ?? undefined}
           />
         ) : activeTab === "Appearance" ? (
-          <AppearanceView blocks={blocks} appearance={appearance} onChange={handleAppearanceChange} />
+          <AppearanceView blocks={blocks} appearance={appearance} onChange={handleAppearanceChange} userName={userName} />
         ) : activeTab === "Statistics" ? (
           <StatisticsView currency={userCurrency} currencySymbol={currencySymbol} analytics={analytics ?? undefined} />
         ) : activeTab === "Orders" ? (

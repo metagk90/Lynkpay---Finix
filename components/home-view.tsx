@@ -93,7 +93,7 @@ export function HomeView({ chartData, currency = "USD", currencySymbol = "$", us
                   href="#"
                   className="text-emerald-400 font-semibold hover:text-emerald-300 transition-colors flex items-center gap-1.5 text-sm"
                 >
-                  {`lynkpay.co/${displayName.toLowerCase().replace(/\s+/g, "")}`}
+                  {`app.lynkpay.co/${userName || displayName.toLowerCase().replace(/\s+/g, "")}`}
                   <ExternalLink size={14} />
                 </a>
               </div>

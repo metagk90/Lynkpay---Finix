@@ -209,3 +209,23 @@ export function emailVerificationEmail(data: { firstName: string; verificationUr
   `)
   return { subject, html }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   7. OTP VERIFICATION - Sent during signup to verify email ownership
+   ───────────────────────────────────────────────────────────────────────────── */
+export function otpVerificationEmail(data: { firstName: string; otp: string; expiresIn: string }): { subject: string; html: string } {
+  const subject = `${data.otp} is your LynkPay verification code`
+  const html = wrapTemplate(`
+    <h1 class="heading">Verify Your Email</h1>
+    <p class="text">Hi <span class="highlight">${data.firstName}</span>,</p>
+    <p class="text">Use the verification code below to complete your signup:</p>
+    <div class="code" style="font-size: 32px; letter-spacing: 8px; font-weight: 700;">${data.otp}</div>
+    <p class="text" style="font-size: 13px;">This code will expire in <strong>${data.expiresIn}</strong>.</p>
+    <div class="warning">
+      <p class="warning-text">Never share this code with anyone. LynkPay will never ask for your verification code.</p>
+    </div>
+    <hr class="divider">
+    <p class="text" style="font-size: 12px;">If you didn't request this code, you can safely ignore this email.</p>
+  `)
+  return { subject, html }
+}
