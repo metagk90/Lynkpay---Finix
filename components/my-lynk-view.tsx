@@ -158,9 +158,9 @@ export function MyLynkView({ onShowPreview, blocks, onAddBlock, onToggleBlock, o
               <button
                 onClick={handleShare}
                 disabled={!userName}
-                className="flex-1 px-6 py-3 border border-emerald-500/50 text-emerald-500 rounded-2xl font-black text-xs uppercase transition-all hover:bg-emerald-500/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-3 border border-emerald-500/50 text-emerald-500 rounded-2xl font-black text-xs uppercase transition-all hover:bg-emerald-500/10 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap"
               >
-                <Share2 size={16} className="inline mr-1" /> Share
+                <Share2 size={16} className="shrink-0" /> <span>Share</span>
               </button>
               <button
                 onClick={handleCopyUrl}
