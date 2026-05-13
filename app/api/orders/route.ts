@@ -97,6 +97,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       orders: mapped,
       total,
+      totalEarnings,
       page,
       totalPages: Math.ceil(total / limit),
     })
