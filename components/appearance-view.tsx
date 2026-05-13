@@ -59,9 +59,10 @@ interface AppearanceViewProps {
   blocks: Block[]
   appearance: AppearanceConfig
   onChange: (update: Partial<AppearanceConfig>) => void
+  userName?: string
 }
 
-export function AppearanceView({ blocks, appearance, onChange }: AppearanceViewProps) {
+export function AppearanceView({ blocks, appearance, onChange, userName = "" }: AppearanceViewProps) {
   const bannerInputRef = useRef<HTMLInputElement>(null)
   const profileInputRef = useRef<HTMLInputElement>(null)
 
@@ -101,7 +102,7 @@ export function AppearanceView({ blocks, appearance, onChange }: AppearanceViewP
         <div className="bg-zinc-900/60 backdrop-blur-xl rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-zinc-800/50">
           <div className="flex items-center gap-2 text-sm">
             <span className="text-zinc-500 font-medium">My Lynkid:</span>
-            <span className="text-white font-bold">https://lynk.id/affribute</span>
+            <span className="text-white font-bold">{userName ? `app.lynkpay.co/${userName}` : "Set up your username"}</span>
           </div>
           <div className="flex gap-3">
             <button className="flex items-center gap-2 px-4 py-2 border border-emerald-500/30 text-emerald-400 rounded-xl text-sm font-bold hover:bg-emerald-500/10 transition-colors">
