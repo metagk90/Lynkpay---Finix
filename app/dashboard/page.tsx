@@ -73,6 +73,8 @@ export default function Page() {
     email: "",
     phone: "",
     country: "",
+    creatorCategory: "",
+    createdAt: "",
   })
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -96,6 +98,8 @@ export default function Page() {
             email: data.user.email || "",
             phone: data.user.phone || "",
             country: data.user.country || "",
+            creatorCategory: data.user.creatorCategory || "",
+            createdAt: data.user.createdAt || "",
           })
         }
         if (data?.dashboard) {
