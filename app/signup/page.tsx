@@ -99,25 +99,20 @@ export default function SignupPage() {
 
   const handleFormSubmit = async (event: FormEvent) => {
     event.preventDefault()
-    console.log("[v0] handleFormSubmit called", { formData })
     setErrorMessage("")
 
     if (formData.password !== formData.confirmPassword) {
-      console.log("[v0] Passwords do not match")
       setErrorMessage("Passwords do not match")
       return
     }
 
     if (!formData.termsAccepted) {
-      console.log("[v0] Terms not accepted")
       setErrorMessage("Please accept the Terms of Service and Privacy Policy")
       return
     }
 
     // Send OTP and move to verification step
-    console.log("[v0] Sending OTP...")
     const sent = await sendOtp()
-    console.log("[v0] OTP send result:", sent)
     if (sent) {
       setStep("otp")
       setOtp(["", "", "", "", "", ""])
