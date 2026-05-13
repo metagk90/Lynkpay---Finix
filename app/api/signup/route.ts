@@ -58,6 +58,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Username already exists" }, { status: 409 })
     }
 
+    // Verify that email has been verified via OTP
+    const otpCollection = db.collection("otp_tokens")
+    const otpRecord = await otpCollection.findOne({ email: input.email, verified: true })
+    if (!otpRecord) {
+      return NextResponse.json({ message: "Email not verified. Please complete OTP verification first." }, { status: 400 })
+    }
+
+    // Delete the OTP record now that signup is proceeding
+    await otpCollection.deleteOne({ email: input.email })
+
     const now = new Date()
     const passwordHash = hashPassword(input.password)
 
