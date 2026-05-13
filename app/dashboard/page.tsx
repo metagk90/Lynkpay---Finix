@@ -80,6 +80,7 @@ export default function Page() {
   const [isSaving, setIsSaving] = useState(false)
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [orderCount, setOrderCount] = useState(0)
+  const [totalEarnings, setTotalEarnings] = useState(0)
   const hasLoadedFromDb = useRef(false)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -119,11 +120,12 @@ export default function Page() {
       })
       .catch(() => {})
 
-    // Fetch order count in parallel
+    // Fetch order count and total earnings in parallel
     fetch("/api/orders?limit=1")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.total != null) setOrderCount(data.total)
+        if (data?.totalEarnings != null) setTotalEarnings(data.totalEarnings)
       })
       .catch(() => {})
   }, [])
@@ -638,6 +640,7 @@ export default function Page() {
             userName={userName}
             userEmail={userEmail}
             analytics={analytics ?? undefined}
+            totalEarnings={totalEarnings}
           />
         ) : activeTab === "Appearance" ? (
           <AppearanceView blocks={blocks} appearance={appearance} onChange={handleAppearanceChange} userName={userName} />

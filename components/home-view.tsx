@@ -54,9 +54,10 @@ interface HomeViewProps {
   userName?: string
   userEmail?: string
   analytics?: AnalyticsData
+  totalEarnings?: number
 }
 
-export function HomeView({ chartData, currency = "USD", currencySymbol = "$", userName = "", userEmail = "", analytics }: HomeViewProps) {
+export function HomeView({ chartData, currency = "USD", currencySymbol = "$", userName = "", userEmail = "", analytics, totalEarnings = 0 }: HomeViewProps) {
   const displayName = userName || "Creator"
   const avatarSeed = userName || "User"
   return (
@@ -134,27 +135,40 @@ export function HomeView({ chartData, currency = "USD", currencySymbol = "$", us
                 </div>
                 <div className="flex flex-col">
                   <span className="font-black text-sm text-white">Earnings</span>
+                  <span className="text-[10px] text-white/70 font-medium">Total Revenue</span>
                 </div>
               </div>
-              <Eye size={18} className="text-white opacity-60 cursor-pointer" />
+              <Eye size={18} className="text-white opacity-60 cursor-pointer hover:opacity-100 transition-opacity" />
             </div>
 
             <div className="mb-6 flex-1">
-              <h2 className="text-2xl font-black text-white tracking-tighter mb-2 italic">{`${currencySymbol} \u2014\u2014.\u2014\u2014`}</h2>
-              <div className="h-1.5 w-2/3 bg-white/30 rounded-full overflow-hidden mt-3">
-                <div className="h-full bg-white w-2/3" />
-              </div>
+              <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter mb-2">
+                {totalEarnings > 0 
+                  ? `${currencySymbol}${(totalEarnings / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                  : `${currencySymbol}0.00`
+                }
+              </h2>
+              {totalEarnings === 0 && (
+                <p className="text-white/70 text-xs font-medium">No earnings yet. Start selling to see your revenue here.</p>
+              )}
+              {totalEarnings > 0 && (
+                <div className="h-1.5 w-full bg-white/30 rounded-full overflow-hidden mt-3">
+                  <div className="h-full bg-white rounded-full" style={{ width: "100%" }} />
+                </div>
+              )}
             </div>
 
             <button className="text-xs font-black text-white underline decoration-2 underline-offset-4 mb-10 hover:opacity-80 transition-opacity text-left">
-              Payout Setting Page
+              Payout Settings
             </button>
 
             <div className="bg-white rounded-2xl p-4 mt-auto">
               <div className="flex items-center justify-between">
                 <div className="flex flex-col">
                   <span className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-1">PayMe Link</span>
-                  <span className="text-emerald-800 text-xs font-bold leading-tight">Verify your account to activate</span>
+                  <span className="text-emerald-800 text-xs font-bold leading-tight">
+                    {totalEarnings > 0 ? "Active and receiving payments" : "Verify your account to activate"}
+                  </span>
                 </div>
                 <button className="bg-emerald-500 text-white p-2 rounded-xl hover:scale-110 active:scale-90 transition-all">
                   <Plus size={16} strokeWidth={3} />
