@@ -165,12 +165,12 @@ export function MyLynkView({ onShowPreview, blocks, onAddBlock, onToggleBlock, o
               <button
                 onClick={handleCopyUrl}
                 disabled={!userName}
-                className="flex-1 px-6 py-3 bg-emerald-500 text-black rounded-2xl font-black text-xs uppercase shadow-lg shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3 bg-emerald-500 text-black rounded-2xl font-black text-xs uppercase shadow-lg shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap"
               >
                 {copied ? (
-                  <><Check size={16} strokeWidth={3} /> Copied!</>
+                  <><Check size={16} strokeWidth={3} className="shrink-0" /> <span>Copied!</span></>
                 ) : (
-                  <><Copy size={16} strokeWidth={3} /> Copy URL</>
+                  <><Copy size={16} strokeWidth={3} className="shrink-0" /> <span>Copy</span></>
                 )}
               </button>
             </div>
