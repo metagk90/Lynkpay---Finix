@@ -144,7 +144,7 @@ export function OrdersView({ userName = "" }: { userName?: string }) {
             rel="noopener noreferrer"
             className="text-sm font-bold text-emerald-400 truncate hover:underline"
           >
-            {userName ? `lynkpay.co/${userName}` : "Set up your username"}
+            {userName ? `app.lynkpay.co/${userName}` : "Set up your username"}
           </a>
         </div>
         <div className="flex items-center gap-3 shrink-0">

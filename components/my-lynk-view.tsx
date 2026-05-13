@@ -149,7 +149,7 @@ export function MyLynkView({ onShowPreview, blocks, onAddBlock, onToggleBlock, o
               <div className="flex items-center gap-2 truncate">
                 <span className="text-zinc-600 text-xs font-bold">{"My Lynk:"}</span>
                 <span className="text-emerald-400 font-black tracking-tight text-sm truncate">
-                  {userName ? `lynkpay.co/${userName}` : "Set up your username"}
+                  {userName ? `app.lynkpay.co/${userName}` : "Set up your username"}
                 </span>
               </div>
               <ExternalLink size={16} className="text-zinc-600 group-hover:text-emerald-400 transition-colors" />
